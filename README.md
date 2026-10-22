@@ -36,3 +36,9 @@ python scripts/check_simulator.py    # censoring, correlation, paired times, Kap
 ```
 python scripts/run1_true_model.py    # tool on the true survival curve, 5 datasets x 3 rho (about 4 min); writes results/
 ```
+
+## Stage 3: forest and Run 2
+
+```
+python scripts/stage3_forest_run2.py # forest quality and per-visit reliance on dataset 0 at each rho (about 2 min)
+```

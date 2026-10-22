@@ -53,3 +53,19 @@ What each stage adds to the project, in plain language.
 - The driver's share is 0.999999875 for every patient. The other two visits get credits of at most 0.0000005, against 0.16 to 5.5 for the driver.
 - The results are exactly the same at all three correlation levels. This is expected: the true curve uses only the driver, and the driver values and background patients are the same at every level.
 - The tiny credit for the other visits is always the same fraction of the driver's credit (0.000000096 for visit 1 and 0.000000029 for visit 2). This shows it is the tool's fixed rounding, not a real effect.
+
+## Stage 3: the forest and Run 2
+
+**Added**
+- The random survival forest (`src/rtds/forest.py`): 200 trees, all three visits considered at every split, at least 15 patients per leaf. Its seed depends only on the dataset number, so a dataset gets the same forest seed at every correlation level. It checks that the fixed time grid lies inside the range where the forest can predict.
+- Model quality on the held-out patients (`src/rtds/metrics.py`): Harrell's C-index (how well the model ranks who has the event first; 0.5 is guessing, 1 is perfect) and the integrated Brier score (average squared error of the predicted survival over the time grid; lower is better).
+- Run 2 (`src/rtds/reliance.py`): shuffle one visit at a time in the held-out set, 5 times each, and measure how much the C-index drops. A big drop means the forest relies on that visit. The shuffles are the same at every correlation level.
+- The Stage 3 script, which does all of this on dataset 0 at each correlation level (about 35 seconds per level).
+
+**Checked** (dataset 0)
+- The grid (0.31 to 11.90) lies inside the forest's range (0 to 63.38) at every correlation level.
+- Held-out C-index: 0.667, 0.665 and 0.675 at correlation 0, 0.5 and 0.9. For comparison, the true risk gives 0.684 on the same patients. Integrated Brier score: 0.187, 0.188 and 0.185.
+- Run 2: shuffling the driver (visit 3) drops the C-index by 0.174, 0.168 and 0.164. Shuffling visit 1 or 2 changes it by at most 0.006. So the forest relies on the driver and hardly at all on the other visits, even when they are strongly correlated with it.
+
+**Fixed along the way**
+- The integrated Brier score crashed when a held-out patient's time was later than every training time. Such patients only count as "still at risk" on our grid, so their time is now capped just below the last training time. This does not change the score.

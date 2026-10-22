@@ -49,3 +49,10 @@ python scripts/stage3_forest_run2.py # forest quality and per-visit reliance on 
 python scripts/stage4_run3.py              # forest + SurvSHAP(t) on dataset 0 at each rho (about 15 min)
 python scripts/stage4_background_check.py  # 50 / 100 / 200 / 500 background rows, dataset 0, rho 0.9 (about 20 min)
 ```
+
+## Stage 5: main runs and analysis
+
+```
+python scripts/stage5_main_runs.py   # 50 datasets x 3 rho, 6 parallel workers (about 2.5 hours); safe to restart
+python scripts/stage5_analysis.py    # summary table, bootstrap intervals, paired tests, figures in results/
+```

@@ -82,3 +82,25 @@ What each stage adds to the project, in plain language.
 - The driver's share of the credit: 0.776, 0.742 and 0.700. The other visits get more credit as they become more similar to the driver, even though Run 2 shows the forest hardly uses them.
 - One explanation on the forest takes about 2 to 4 seconds.
 - Background size, compared with the largest (500 rows): with 100 rows the top visit is the same for 94% of patients, and the driver's share differs by 0.057 on average. The hit rate falls slightly as the background grows: 0.93, 0.91, 0.89 and 0.87 for 50, 100, 200 and 500 rows. Time per patient grows from 0.8 to 8.8 seconds. We keep 100 rows, as designed.
+
+## Stage 5: main runs and first analysis of Part 1
+
+**Added**
+- The main runs (`scripts/stage5_main_runs.py`, `src/rtds/run_dataset.py`): 50 datasets at each of the 3 correlation levels. For each dataset the forest is refitted, Run 2 and Run 3 are done, and 100 patients are explained, giving 15,000 explanations. Each dataset is saved on its own as soon as it finishes, and a restart skips finished datasets. Six datasets run in parallel. The full run took 160 minutes.
+- For each dataset, the C-index of the true risk score as a fixed yardstick for the forest (requested after Stage 3).
+- The analysis (`scripts/stage5_analysis.py`, `src/rtds/stats.py`, `src/rtds/figures.py`): average per dataset, then over datasets. 95% intervals come from resampling the 50 datasets 10,000 times, never the patients. Paired Wilcoxon tests compare correlation levels on the same datasets: 2 scores x 3 pairs of levels = 6 comparisons. Three figures.
+
+**Results** (means over 50 datasets, 95% intervals in brackets)
+
+| Correlation | Hit rate | Driver's credit share | Share for visit 1 | Share for visit 2 | Run 2 drop, visit 3 | Forest C-index | True-risk C-index |
+|---|---|---|---|---|---|---|---|
+| 0 | 0.906 [0.888, 0.923] | 0.718 [0.706, 0.729] | 0.143 | 0.139 | 0.169 | 0.669 | 0.679 |
+| 0.5 | 0.900 [0.883, 0.915] | 0.715 [0.703, 0.726] | 0.147 | 0.139 | 0.168 | 0.669 | 0.679 |
+| 0.9 | 0.876 [0.848, 0.900] | 0.672 [0.653, 0.689] | 0.167 | 0.161 | 0.154 | 0.668 | 0.679 |
+
+- No ties and no undefined shares among the 15,000 patients.
+- Between correlation 0 and 0.5 nothing changes clearly (hit p = 0.14, share p = 0.33).
+- At correlation 0.9 the tool does worse. Compared with correlation 0, the hit rate is 0.03 lower (p = 0.001) and the driver's share is 0.046 lower (p = 4e-9). Compared with 0.5, the share is lower (p = 8e-13) and the hit rate is lower (p = 0.018). With 6 comparisons, the strict Bonferroni threshold is 0.05 / 6 = 0.0083, and only that last hit-rate result (p = 0.018) does not pass it.
+- Run 2 shows the forest hardly uses visits 1 and 2 at any level (drops of 0.002 or less). Its reliance on visit 3 also falls a little at 0.9 (0.169 to 0.154). So part of the change at 0.9 may come from the forest itself, not only from the tool.
+- The forest's C-index is about 0.01 below the true-risk C-index at every level, so the model is close to the best possible.
+- Check: dataset 0 in the main runs gives the same hits, shares and C-indexes as Stage 4. 5 of its 300 credit values differ in the last binary digit (4e-16).

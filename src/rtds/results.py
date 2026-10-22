@@ -13,6 +13,9 @@ TABLE1_COLUMNS = [
 ]
 TABLE2_COLUMNS = ["version", "scenario", "rho", "dataset_seed", "visit", "c_index_drop"]
 
+# One row per dataset: model quality and the true-risk C-index as a fixed reference.
+DATASET_COLUMNS = ["version", "scenario", "rho", "dataset_seed", "heldout_c_index", "true_risk_c_index"]
+
 # Ties and NaN shares do not fit Table 1's fixed columns, so they go to a separate log.
 LOG_COLUMNS = ["version", "scenario", "rho", "dataset_seed", "patient_id", "run", "n_tied", "share_is_nan"]
 

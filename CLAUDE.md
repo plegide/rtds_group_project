@@ -76,7 +76,8 @@ LSTM (Part 2 only, Stage 6)
 2. Run 1 on a handful of datasets. Check: the driver gets essentially all the credit and the other visits about zero.
 3. Fit the forest and Run 2. Check: held-out C-index and integrated Brier score, per-visit reliance, and the time grid lies inside the forest's range. If the model barely uses the true driver, say so before going on.
 4. Run 3 on one dataset at each correlation level, plus the one-dataset background-size check. Show per-visit credit for a few patients and the hit rate and credit share. Stop for my review.
-5. Main runs for the forest, scenario A: 3 correlation levels x 50 datasets, model refitted each time, results saved after every dataset so a crash loses nothing, parallel where useful. Then a first analysis of Part 1 (tables, figures, the tests above). Stop for my review. Part 1 must be complete and usable on its own at this point.
+5. Main runs for the forest, scenario A: 3 correlation levels x 50 datasets, model refitted each time, results saved after every dataset so a crash loses nothing, parallel where useful.
+   Also record, per dataset, the held-out C-index of the true risk score (the driver visit) as a fixed reference for the forest's C-index (added after Stage 3). Then a first analysis of Part 1 (tables, figures, the tests above). Stop for my review. Part 1 must be complete and usable on its own at this point.
 6. LSTM (Part 2), only after I accept Part 1. 6a: build the wrapper and test it with the tool. 6b: propose the LSTM settings and wait. 6c: pilot on one dataset, check it learned the driver. 6d: main runs for both models, scenarios A and B, 3 correlation levels x 50 datasets. Stop after each sub-step.
 7. Final analysis: tables, figures and the tests above, including forest versus LSTM and scenario A versus B. Every number in the report must be regenerable by one script.
 

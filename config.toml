@@ -37,3 +37,8 @@ n_explained = 100
 n_datasets = 50                   # per correlation level
 run1_n_datasets = 5               # Run 1 is a sanity check on a handful of datasets
 run2_n_shuffles = 5
+
+[scores]
+# Credits within this relative distance of the maximum count as tied. Stage 0 measured
+# ~1e-7 relative rounding inside survshap, so closer credits cannot be told apart.
+tie_rel_tol = 1e-6

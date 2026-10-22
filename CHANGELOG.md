@@ -39,3 +39,17 @@ What each stage adds to the project, in plain language.
 - A Cox model finds an effect of 0.690 to 0.692 for visit 3 (true value 0.693) and at most 0.007 in size for the other visits, at every correlation level.
 - Running the same dataset twice gives identical data, and a different dataset number gives different data.
 - The Stage 0 checks now use the real simulator instead of their own test data: dataset 0 at correlation 0.9, the real time grid, and the background rows and explained patients chosen by seed (new file `src/rtds/selection.py`). The throwaway test-data file was removed. The results are unchanged: the tool still matches the exact calculation to about 1 in 10 million, and the driver still gets 99.99999% of the credit.
+
+## Stage 2: Run 1, the tool on the true survival curve
+
+**Added**
+- Scoring for each explained patient (`src/rtds/scores.py`): the visit with the most credit, the hit (1 if it is the driver; 1/2 or 1/3 if the driver is tied for most credit), and the driver's share of the total credit.
+- Credits that differ by less than one part in a million count as tied. Stage 0 showed the tool's own rounding is about one part in ten million, so closer credits cannot be told apart. This setting is in `config.toml`.
+- A writer for the results tables (`src/rtds/results.py`), with the fixed Table 1 and Table 2 columns. Tables are saved after every dataset. Ties and undefined shares go to a separate log, because Table 1's columns are fixed.
+- The Run 1 script: the tool explains the true survival curve for 100 held-out patients in each of 5 datasets, at each of the 3 correlation levels (1,500 explanations, about 4 minutes).
+
+**Checked**
+- At every correlation level the driver had the most credit for all 1,500 patients (hit rate 1.0), with no ties and no undefined shares.
+- The driver's share is 0.999999875 for every patient. The other two visits get credits of at most 0.0000005, against 0.16 to 5.5 for the driver.
+- The results are exactly the same at all three correlation levels. This is expected: the true curve uses only the driver, and the driver values and background patients are the same at every level.
+- The tiny credit for the other visits is always the same fraction of the driver's credit (0.000000096 for visit 1 and 0.000000029 for visit 2). This shows it is the tool's fixed rounding, not a real effect.

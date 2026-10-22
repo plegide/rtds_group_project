@@ -30,3 +30,9 @@ python scripts/one_patient_test.py   # one patient explained with the true survi
 ```
 python scripts/check_simulator.py    # censoring, correlation, paired times, Kaplan-Meier, Cox, reproducibility (about 1 min)
 ```
+
+## Stage 2: Run 1
+
+```
+python scripts/run1_true_model.py    # tool on the true survival curve, 5 datasets x 3 rho (about 4 min); writes results/
+```

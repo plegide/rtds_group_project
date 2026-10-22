@@ -37,8 +37,19 @@ n_explained = 100
 n_datasets = 50                   # per correlation level
 run1_n_datasets = 5               # Run 1 is a sanity check on a handful of datasets
 run2_n_shuffles = 5
+n_jobs = 6                        # parallel datasets; each forest holds ~210 MB, 8 physical cores
 
 [scores]
 # Credits within this relative distance of the maximum count as tied. Stage 0 measured
 # ~1e-7 relative rounding inside survshap, so closer credits cannot be told apart.
 tie_rel_tol = 1e-6
+
+[background_check]
+# Stage 4 only: confirm that 100 background rows is reasonable. Not a result.
+dataset_index = 0
+rho = 0.9                         # strongest correlation, where the filled-in values matter most
+sizes = [50, 100, 200, 500]       # nested: each background contains the smaller ones; 100 = the real one
+
+[analysis]
+n_bootstrap = 10000               # resamples of datasets (never of patients)
+ci_level = 0.95

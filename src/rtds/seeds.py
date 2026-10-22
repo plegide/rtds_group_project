@@ -16,6 +16,8 @@ PURPOSES = {
     "explained": 3,   # which held-out patients are explained
     "model": 4,       # the forest's own seed
     "shuffle": 5,     # Run 2 column shuffles
+    "background_check": 6,  # extra background rows for the Stage 4 size check
+    "bootstrap": 7,   # resampling datasets in the analysis
 }
 
 

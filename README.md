@@ -42,3 +42,10 @@ python scripts/run1_true_model.py    # tool on the true survival curve, 5 datase
 ```
 python scripts/stage3_forest_run2.py # forest quality and per-visit reliance on dataset 0 at each rho (about 2 min)
 ```
+
+## Stage 4: Run 3 on one dataset per rho
+
+```
+python scripts/stage4_run3.py              # forest + SurvSHAP(t) on dataset 0 at each rho (about 15 min)
+python scripts/stage4_background_check.py  # 50 / 100 / 200 / 500 background rows, dataset 0, rho 0.9 (about 20 min)
+```

@@ -69,3 +69,16 @@ What each stage adds to the project, in plain language.
 
 **Fixed along the way**
 - The integrated Brier score crashed when a held-out patient's time was later than every training time. Such patients only count as "still at risk" on our grid, so their time is now capped just below the last training time. This does not change the score.
+
+## Stage 4: Run 3, the tool on the forest (one dataset per correlation level)
+
+**Added**
+- One shared piece of code (`src/rtds/explain_dataset.py`) that explains a dataset's 100 chosen held-out patients and turns the credits into Table 1 rows. Run 1, Run 3 and the main runs all use it. Rerunning Run 1 with it gave a byte-identical table.
+- The Run 3 script: fit the forest on dataset 0 at each correlation level, run Run 2 for comparison, then explain the 100 patients with SurvSHAP(t).
+- The background-size check: the same Run 3 on dataset 0 at correlation 0.9, with 50, 100, 200 and 500 background patients. The backgrounds are nested, so each one contains the smaller ones. Its settings are in `config.toml`.
+
+**Checked** (dataset 0)
+- Hit rate (how often the driver gets the most credit): 0.96, 0.98 and 0.91 at correlation 0, 0.5 and 0.9.
+- The driver's share of the credit: 0.776, 0.742 and 0.700. The other visits get more credit as they become more similar to the driver, even though Run 2 shows the forest hardly uses them.
+- One explanation on the forest takes about 2 to 4 seconds.
+- Background size, compared with the largest (500 rows): with 100 rows the top visit is the same for 94% of patients, and the driver's share differs by 0.057 on average. The hit rate falls slightly as the background grows: 0.93, 0.91, 0.89 and 0.87 for 50, 100, 200 and 500 rows. Time per patient grows from 0.8 to 8.8 seconds. We keep 100 rows, as designed.

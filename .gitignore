@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+results/
+# Course PDFs are not ours and stay out of the public repo.
+*.pdf

@@ -1,0 +1,39 @@
+# Every parameter of the study lives here. The code reads nothing else.
+# Values follow the fixed design in CLAUDE.md; do not tune them per setting.
+
+master_seed = 20261102
+
+[simulation]
+n_visits = 3
+rho_levels = [0.0, 0.5, 0.9]      # exchangeable correlation between visits
+h0 = 0.1                          # baseline hazard
+b = 0.6931471805599453            # ln 2 (TOML has no expressions, so the value is written out)
+target_censored_fraction = 0.30   # censoring rate is solved once to hit this
+n_train = 1000
+n_test = 500
+n_reference = 100000              # "large reference sample" for the time grid
+
+[scenarios]
+# Driver visit per scenario (1-based, matching the column names visit_1..visit_3).
+A = 3
+B = 1
+part1 = ["A"]                     # Part 1 uses scenario A only
+
+[forest]
+n_estimators = 200
+max_features = 1.0                # fraction of columns, so 1.0 = all columns (sksurv default is "sqrt")
+min_samples_leaf = 15
+
+[tool]
+calculation_method = "kernel"
+aggregation_method = "integral"
+n_grid = 50
+grid_lower_quantile = 0.05
+grid_upper_quantile = 0.80
+n_background = 100
+n_explained = 100
+
+[runs]
+n_datasets = 50                   # per correlation level
+run1_n_datasets = 5               # Run 1 is a sanity check on a handful of datasets
+run2_n_shuffles = 5

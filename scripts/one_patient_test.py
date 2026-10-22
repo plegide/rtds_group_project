@@ -16,17 +16,25 @@ import numpy as np
 
 from rtds.config import load_config
 from rtds.explain_survshap import SurvShapExplainer
+from rtds.grid import time_grid
+from rtds.inputs import FlatVisitColumns
+from rtds.selection import tool_inputs
+from rtds.simulate import simulate_dataset
 from rtds.true_model import TrueSurvivalModel
-from stage0_data import make_setup
 
 RHO = 0.9  # the hardest correlation level in the design
+SCENARIO = "A"
+DATASET_INDEX = 0
 
 
 def main():
     cfg = load_config()
     sim, tool = cfg["simulation"], cfg["tool"]
-    background, background_y, patients, grid, driver_col = make_setup(cfg, RHO)
-    patient = patients.iloc[[0]].reset_index(drop=True)
+    dataset = simulate_dataset(cfg, DATASET_INDEX, RHO, SCENARIO)
+    background, background_y, patients = tool_inputs(cfg, dataset, DATASET_INDEX, FlatVisitColumns())
+    patient = patients.iloc[[0]].reset_index(drop=True)  # the first explained held-out patient
+    grid = time_grid(cfg)
+    driver_col = f"visit_{cfg['scenarios'][SCENARIO]}"
 
     model = TrueSurvivalModel(sim["h0"], sim["b"], driver_col, grid)
     explainer = SurvShapExplainer(background, background_y, grid, tool["calculation_method"], tool["aggregation_method"])

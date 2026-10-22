@@ -38,3 +38,4 @@ What each stage adds to the project, in plain language.
 - The Kaplan-Meier survival curve is never more than 0.003 away from the true curve on the time grid.
 - A Cox model finds an effect of 0.690 to 0.692 for visit 3 (true value 0.693) and at most 0.007 in size for the other visits, at every correlation level.
 - Running the same dataset twice gives identical data, and a different dataset number gives different data.
+- The Stage 0 checks now use the real simulator instead of their own test data: dataset 0 at correlation 0.9, the real time grid, and the background rows and explained patients chosen by seed (new file `src/rtds/selection.py`). The throwaway test-data file was removed. The results are unchanged: the tool still matches the exact calculation to about 1 in 10 million, and the driver still gets 99.99999% of the credit.

@@ -23,9 +23,14 @@ from scipy.integrate import trapezoid
 from sksurv.functions import StepFunction
 
 from rtds.config import load_config
-from stage0_data import make_setup
+from rtds.grid import time_grid
+from rtds.inputs import FlatVisitColumns
+from rtds.selection import tool_inputs
+from rtds.simulate import simulate_dataset
 
 RHO = 0.9  # the strongest correlation in the design, where conditional filling would differ most
+SCENARIO = "A"
+DATASET_INDEX = 0
 
 
 class InteractionTestModel:
@@ -86,8 +91,10 @@ def brute_force_shapley(model, background, patient, grid):
 
 def main():
     cfg = load_config()
-    background, background_y, patients, grid, _ = make_setup(cfg, RHO)
-    patient = patients.iloc[[0]].reset_index(drop=True)
+    dataset = simulate_dataset(cfg, DATASET_INDEX, RHO, SCENARIO)
+    background, background_y, patients = tool_inputs(cfg, dataset, DATASET_INDEX, FlatVisitColumns())
+    patient = patients.iloc[[0]].reset_index(drop=True)  # the first explained held-out patient
+    grid = time_grid(cfg)
     model = InteractionTestModel(cfg["simulation"]["h0"], grid)
     cols = list(background.columns)
 

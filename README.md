@@ -24,3 +24,9 @@ pip install -r requirements.txt
 python scripts/verify_survshap.py    # survshap's kernel method: default, exact, independent masking
 python scripts/one_patient_test.py   # one patient explained with the true survival function
 ```
+
+## Stage 1 checks
+
+```
+python scripts/check_simulator.py    # censoring, correlation, paired times, Kaplan-Meier, Cox, reproducibility (about 1 min)
+```

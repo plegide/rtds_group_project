@@ -21,3 +21,20 @@ What each stage adds to the project, in plain language.
 
 **Changed from the original plan**
 - Python 3.12 instead of 3.13. A package that scikit-survival needs (`ecos`) cannot be installed on Python 3.13 without a C compiler.
+
+## Stage 1: the simulator
+
+**Added**
+- The simulator. Each patient gets 3 visit measurements that are correlated with each other at the chosen level (0, 0.5 or 0.9). The time to the event depends only on the driver visit (visit 3 in scenario A). Patients can also be censored, at random and unrelated to their visits, so that about 30% of them have no observed event.
+- The driver visit is built first, directly from its own random number, and the other two visits are built around it. Because of this, a dataset has exactly the same driver values, event times and censoring at every correlation level. Only the other two visits change. This makes the three correlation levels a fair paired comparison.
+- The censoring rate is calculated exactly from the settings, not estimated by trial. It comes out at 0.0392.
+- The fixed time grid: 50 evenly spaced times between the 5th and 80th percentile of observed times in a reference sample of 100,000 patients. It runs from 0.31 to 11.90 and is the same for every dataset and run.
+- The input builder for Part 1, which turns each visit into a plain column (`visit_1`, `visit_2`, `visit_3`).
+
+**Checked** (in a sample of 100,000 patients unless stated)
+- Censoring is 30.0% (target 30%). Across the 50 training sets it is 30.1% on average, ranging from 27.3% to 33.1%.
+- The correlation between visits matches the chosen level to within 0.003 at all three levels.
+- For all 50 datasets, the event times, censoring and driver values are identical across the three correlation levels.
+- The Kaplan-Meier survival curve is never more than 0.003 away from the true curve on the time grid.
+- A Cox model finds an effect of 0.690 to 0.692 for visit 3 (true value 0.693) and at most 0.007 in size for the other visits, at every correlation level.
+- Running the same dataset twice gives identical data, and a different dataset number gives different data.

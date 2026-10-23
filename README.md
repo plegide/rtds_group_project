@@ -58,3 +58,20 @@ python scripts/stage4_background_check.py  # 50 / 100 / 200 / 500 background row
 python scripts/stage5_main_runs.py   # 50 datasets x 3 rho, 6 parallel workers (about 2.5 hours); safe to restart
 python scripts/stage5_analysis.py    # summary table, bootstrap intervals, paired tests, figures in results/
 ```
+
+## Scenario B (forest) and Part 2 (LSTM)
+
+```
+python scripts/check_simulator.py --scenario B        # B1: simulator checks, plus "same patients as A"
+python scripts/run1_true_model.py --scenario B        # B2: Run 1
+python scripts/stage3_forest_run2.py --scenario B     # B3: forest + Run 2 on dataset 0
+python scripts/stage4_run3.py --scenario B            # B4: Run 3 on dataset 0 (3 rho in parallel)
+python scripts/stageB5_forest_mirror.py               # B5: forest on B for 5 datasets, compared with A
+python scripts/stage6a_lstm_wrapper_test.py           # 6a: LSTM wrapper tested with SurvSHAP(t)
+python scripts/stage6c_lstm_pilot.py                  # 6c: LSTM pilot on dataset 0, both scenarios
+python scripts/stage5_main_runs.py --scenario A --model lstm   # 6d: LSTM main runs (about 5 min each)
+python scripts/stage5_main_runs.py --scenario B --model lstm
+python scripts/stage5_analysis.py --scenario A --model lstm
+python scripts/stage5_analysis.py --scenario B --model lstm
+python scripts/stage7_final_analysis.py               # 7: every summary number, test and figure -> results/final/
+```

@@ -234,3 +234,24 @@ No ties and no undefined shares among the 30,000 patients. The true-risk C-index
 - Within each scenario, the scores get worse as correlation rises (paired Wilcoxon p-values are in `results/scenario_<X>/lstm/analysis/paired_tests.csv`). The only exceptions are the hit rate between 0 and 0.5 in A (p = 0.13) and between 0.5 and 0.9 in B (p = 0.82).
 
 **Fixed:** the analysis printout labelled the C-index line "forest" for every model; it now shows the model's name.
+
+## Stage 7: final analysis
+
+**Added:** `scripts/stage7_final_analysis.py`, one script that regenerates every summary number, test and figure from the saved tables. Output is in `results/final/`: `summary.csv`, `tests.csv`, `run1_summary.csv`, `analysis_output.txt` and `figures/`.
+- The forest's scenario B numbers are scenario A's numbers relabelled, as shown in Stages B4 and B5. The summary marks them with `source = relabelled from forest A`.
+- Intervals come from resampling the 50 datasets, never patients.
+- Tests are paired Wilcoxon signed-rank tests on the shared datasets: 36 comparisons in total. That is 18 between correlation levels (forest A, LSTM A, LSTM B), 12 forest vs LSTM (each scenario and level), and 6 LSTM scenario A vs B (each level), each for the hit rate and the credit share. Every p-value is also given Holm-adjusted for all 36.
+- Figures: hit rate and credit share for forest vs LSTM in both scenarios, and per-visit credit (Run 3) next to per-visit reliance (Run 2) for the forest A, LSTM A and LSTM B.
+
+**Main results** (hit rate / driver's credit share; means over 50 datasets)
+
+| Correlation | Forest (A and B) | LSTM, scenario A (driver read last) | LSTM, scenario B (driver read first) |
+|---|---|---|---|
+| 0 | 0.906 / 0.718 | 0.938 / 0.801 | 0.853 / 0.691 |
+| 0.5 | 0.900 / 0.715 | 0.919 / 0.770 | 0.777 / 0.595 |
+| 0.9 | 0.876 / 0.672 | 0.336 / 0.323 | 0.769 / 0.483 |
+
+- Forest vs LSTM: every comparison differs (Holm-adjusted p at most 0.025). With the driver read last (A), the LSTM's explanations are better than the forest's at 0 and 0.5. With the driver read first (B), they are worse at every level.
+- LSTM, scenario A vs B: they differ at every level (Holm-adjusted p at most 7e-7). At 0 and 0.5, A is better. At 0.9, B is better, because in A the LSTM itself stopped singling out the driver (see Stage 6d).
+- Between correlation levels, 15 of 18 comparisons stay below 0.05 after Holm adjustment. The exceptions are the forest's hit rate from 0 to 0.5 and from 0.5 to 0.9, and the LSTM's hit rate from 0.5 to 0.9 in scenario B. The LSTM's credit share from 0 to 0.5 in A has a raw p of 0.009, but 0.052 after Holm.
+- Run 1 (true curve) gives the driver all the credit in both scenarios (share 0.999999875 in A, 0.999999914 in B).

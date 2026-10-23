@@ -74,3 +74,37 @@ def per_visit_panels(summary, path, driver_visit):
     fig.tight_layout(rect=(0, 0, 1, 0.92))
     fig.savefig(path, dpi=200)
     plt.close(fig)
+
+
+# Model identity in the comparison figures. Ink and violet keep the visit colours (blue,
+# orange, aqua) free of a second meaning; marker shape is a second cue besides colour.
+MODEL_STYLE = {"forest": {"color": TEXT, "marker": "o"}, "lstm": {"color": "#6250d6", "marker": "s"}}
+
+
+def models_by_rho(summary, metric, ylabel, title, path, chance=None, ylim=(0, 1)):
+    """One panel per scenario; per rho, each model's mean with its bootstrap interval."""
+    scenarios = sorted(summary["scenario"].unique())
+    fig, axes = plt.subplots(1, len(scenarios), figsize=(5 * len(scenarios), 4), sharey=True)
+    for ax, scen in zip(axes, scenarios):
+        for j, model in enumerate(("forest", "lstm")):
+            s = summary[(summary["scenario"] == scen) & (summary["model"] == model)].sort_values("rho")
+            xs = [x + (j - 0.5) * 0.18 for x in range(len(s))]  # side by side, not overlapping
+            m = s[f"{metric}_mean"]
+            st = MODEL_STYLE[model]
+            ax.errorbar(xs, m, yerr=[m - s[f"{metric}_lo"], s[f"{metric}_hi"] - m], fmt=st["marker"],
+                        color=st["color"], ms=7, capsize=3, elinewidth=1.5, label=model, zorder=3)
+        if chance is not None:
+            ax.axhline(chance, color=TEXT_2, linestyle="--", linewidth=1.2)
+            ax.annotate("chance", (-0.45, chance), xytext=(0, 4), textcoords="offset points",
+                        ha="left", color=TEXT_2)
+        ax.set_xticks(range(len(s)), [f"ρ = {r:g}" for r in s["rho"]])
+        ax.set_xlim(-0.5, len(s) - 0.5)
+        ax.set_ylim(*ylim)
+        ax.set_title(f"Scenario {scen}", loc="left", color=TEXT)
+    axes[0].set_ylabel(ylabel)
+    # Values are in summary.csv; the figure shows the pattern, so no number sits on a point.
+    fig.legend(*axes[0].get_legend_handles_labels(), loc="upper right", ncol=2, frameon=False)
+    fig.suptitle(title, x=0.01, y=0.98, ha="left", color=TEXT, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(path, dpi=200)
+    plt.close(fig)

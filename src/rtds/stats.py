@@ -47,3 +47,28 @@ def paired_tests(per_ds, metrics, rhos):
                          "mean_a": wide[a].mean(), "mean_b": wide[b].mean(),
                          "median_diff_b_minus_a": diff.median(), "wilcoxon_stat": stat, "p_value": p})
     return pd.DataFrame(rows)
+
+
+def paired_wilcoxon(a, b):
+    """Wilcoxon signed-rank on two per-dataset series indexed by dataset_seed (pairs = same dataset).
+
+    Returns (n_datasets, mean_a, mean_b, median of b - a, statistic, p-value)."""
+    both = pd.concat([a.rename("a"), b.rename("b")], axis=1).dropna()
+    diff = both["b"] - both["a"]
+    if np.all(diff == 0):
+        stat, p = np.nan, 1.0  # identical in every dataset: nothing to test
+    else:
+        stat, p = wilcoxon(both["b"], both["a"])
+    return len(both), both["a"].mean(), both["b"].mean(), diff.median(), stat, p
+
+
+def holm(p_values):
+    """Holm's step-down adjustment for many comparisons (controls the family-wise error rate)."""
+    p = np.asarray(p_values, dtype=float)
+    order = np.argsort(p)
+    adjusted = np.empty_like(p)
+    running = 0.0
+    for rank, i in enumerate(order):
+        running = max(running, (len(p) - rank) * p[i])
+        adjusted[i] = min(1.0, running)
+    return adjusted

@@ -151,3 +151,20 @@ In scenario B, visit 1 drives the risk and visit 3 is an innocent bystander that
 - One fit takes about 7 seconds and one explanation 0.11 seconds, about 20 times faster than on the forest.
 
 **Fixed:** `scripts/stage4_run3.py` had a broken line after the scenario change in the previous commit, so it could not run. It is fixed and was rerun for scenario B (Stage B4).
+
+## Stage 6b: the LSTM settings
+
+You delegated the choice on 23 October. The settings are fixed after the pilot (6c) and never tuned per setting. They are in `config.toml` under `[lstm]`.
+
+| Setting | Value | Why |
+|---|---|---|
+| LSTM layers | 1 | Fixed by the design. |
+| Hidden size | 16 | Each patient has only 3 numbers and there are 800 training patients, so a small layer is enough and is less likely to overfit. |
+| Learning rate | 0.005 (Adam) | Fast enough for a network this small, and stable with 800 patients. |
+| Batch size | 64 | About 13 updates per epoch: enough updates without very noisy steps. |
+| Maximum epochs | 300 | Only an upper bound; early stopping decides when to stop. In the pilot it never came close (52 to 92 epochs). |
+| Early-stopping patience | 20 epochs | Stops once the validation loss has not improved for 20 epochs, then keeps the best weights. |
+| Validation share | 20% of the training patients (200) | Used only for early stopping; the 500 held-out patients are never touched during training. |
+| Seed | from the master seed, by dataset number | Same weights, validation split and batch order every run; one thread per model for reproducibility. |
+
+The forest's settings were also fixed in advance, so neither model is tuned.

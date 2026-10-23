@@ -1,0 +1,2 @@
+version,scenario,rho,dataset_seed,heldout_c_index,true_risk_c_index
+forest,A,0.0,25,0.6653961278461004,0.6734341543256241

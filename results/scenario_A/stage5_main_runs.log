@@ -1,0 +1,20 @@
+[Parallel(n_jobs=6)]: Using backend LokyBackend with 6 concurrent workers.
+[Parallel(n_jobs=6)]: Done   1 tasks      | elapsed:  6.8min
+[Parallel(n_jobs=6)]: Done   6 tasks      | elapsed:  6.9min
+[Parallel(n_jobs=6)]: Done  13 tasks      | elapsed: 19.6min
+[Parallel(n_jobs=6)]: Done  20 tasks      | elapsed: 26.0min
+[Parallel(n_jobs=6)]: Done  29 tasks      | elapsed: 32.9min
+[Parallel(n_jobs=6)]: Done  38 tasks      | elapsed: 45.0min
+[Parallel(n_jobs=6)]: Done  49 tasks      | elapsed: 57.4min
+[Parallel(n_jobs=6)]: Done  60 tasks      | elapsed: 65.3min
+[Parallel(n_jobs=6)]: Done  73 tasks      | elapsed: 82.1min
+[Parallel(n_jobs=6)]: Done  86 tasks      | elapsed: 95.3min
+[Parallel(n_jobs=6)]: Done 101 tasks      | elapsed: 111.0min
+[Parallel(n_jobs=6)]: Done 116 tasks      | elapsed: 126.9min
+[Parallel(n_jobs=6)]: Done 133 tasks      | elapsed: 144.6min
+[Parallel(n_jobs=6)]: Done 150 out of 150 | elapsed: 159.6min finished
+150 tasks run, 0 skipped, 159.6 min
+results/table1_main.csv: 15000 rows
+results/table2_main.csv: 450 rows
+results/log_main.csv: 0 rows
+results/datasets_main.csv: 150 rows

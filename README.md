@@ -17,6 +17,8 @@ pip install -r requirements.txt
 - `config.toml`: every parameter and the master seed.
 - `src/rtds/`: the library code (config loading, seeds, interfaces, true model, SurvSHAP wrapper).
 - `scripts/`: runnable checks and runs. Start each one from the repository root.
+  The run scripts take `--scenario A` (default; visit 3 drives the risk) or `--scenario B` (visit 1 drives it).
+- `results/scenario_A/`, `results/scenario_B/`: every table, log and figure, per scenario.
 
 ## Stage 0 checks
 

@@ -50,7 +50,7 @@ def interval_by_rho(summary, metric, ylabel, title, path, per_ds=None, chance=No
     plt.close(fig)
 
 
-def per_visit_panels(summary, path):
+def per_visit_panels(summary, path, driver_visit):
     """Left: share of SurvSHAP(t) credit per visit (Run 3). Right: C-index drop per visit (Run 2)."""
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
     width = 0.26
@@ -61,7 +61,7 @@ def per_visit_panels(summary, path):
             col = pattern.format(k=k)
             xs = [x + (j - 1) * (width + 0.02) for x in range(len(summary))]  # small surface gap between bars
             mean = summary[f"{col}_mean"]
-            ax.bar(xs, mean, width=width, color=VISIT_COLORS[k], label=f"visit {k}" + (" (driver)" if k == 3 else ""),
+            ax.bar(xs, mean, width=width, color=VISIT_COLORS[k], label=f"visit {k}" + (" (driver)" if k == driver_visit else ""),
                    zorder=2)
             ax.errorbar(xs, mean, yerr=[mean - summary[f"{col}_lo"], summary[f"{col}_hi"] - mean],
                         fmt="none", ecolor=TEXT, elinewidth=1.2, capsize=3, zorder=3)

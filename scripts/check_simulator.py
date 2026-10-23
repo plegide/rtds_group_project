@@ -7,7 +7,7 @@
 5. A Cox model on a large sample puts the effect on the driver and about zero elsewhere.
 6. The same seed gives identical data.
 
-Run from the repository root:  python scripts/check_simulator.py
+Run from the repository root:  python scripts/check_simulator.py [--scenario B]
 """
 
 import sys
@@ -19,24 +19,25 @@ import numpy as np
 from sksurv.linear_model import CoxPHSurvivalAnalysis
 from sksurv.nonparametric import kaplan_meier_estimator
 
+from rtds.cli import parse_scenario
 from rtds.censoring import censored_fraction, marginal_survival
 from rtds.config import load_config
 from rtds.grid import time_grid
 from rtds.inputs import FlatVisitColumns
 from rtds.simulate import censor_rate_from_config, reference_sample, simulate_dataset
 
-SCENARIO = "A"  # Part 1 uses scenario A only
 
 
 def main():
+    scenario = parse_scenario(__doc__)
     cfg = load_config()
     sim = cfg["simulation"]
     rhos = sim["rho_levels"]
     n_datasets = cfg["runs"]["n_datasets"]
-    driver = cfg["scenarios"][SCENARIO]
+    driver = cfg["scenarios"][scenario]
     builder = FlatVisitColumns()
-    large = {rho: reference_sample(cfg, rho, SCENARIO) for rho in rhos}
-    print(f"large sample: {sim['n_reference']} patients; scenario {SCENARIO}, driver = visit_{driver}")
+    large = {rho: reference_sample(cfg, rho, scenario) for rho in rhos}
+    print(f"large sample: {sim['n_reference']} patients; scenario {scenario}, driver = visit_{driver}")
 
     # 1. Censoring
     rate = censor_rate_from_config(cfg)
@@ -48,7 +49,7 @@ def main():
     print(f"    large sample: censored = {large_cens:.4f}, events = {1 - large_cens:.4f} "
           f"(binomial SE {se:.4f})")
     assert abs(large_cens - target) < 4 * se
-    per_dataset = [1 - simulate_dataset(cfg, i, rhos[0], SCENARIO).train.event.mean() for i in range(n_datasets)]
+    per_dataset = [1 - simulate_dataset(cfg, i, rhos[0], scenario).train.event.mean() for i in range(n_datasets)]
     print(f"    {n_datasets} training sets: censored mean = {np.mean(per_dataset):.4f}, "
           f"min = {np.min(per_dataset):.4f}, max = {np.max(per_dataset):.4f}")
 
@@ -64,7 +65,7 @@ def main():
     # 3. Event times identical across rho
     same = True
     for i in range(n_datasets):
-        ds = [simulate_dataset(cfg, i, rho, SCENARIO) for rho in rhos]
+        ds = [simulate_dataset(cfg, i, rho, scenario) for rho in rhos]
         for d in ds[1:]:
             for part in ("train", "test"):
                 a, b = getattr(ds[0], part), getattr(d, part)
@@ -99,8 +100,8 @@ def main():
             assert abs(v - expected) < 0.05
 
     # 6. Reproducibility
-    a, b = simulate_dataset(cfg, 3, rhos[1], SCENARIO), simulate_dataset(cfg, 3, rhos[1], SCENARIO)
-    c = simulate_dataset(cfg, 4, rhos[1], SCENARIO)
+    a, b = simulate_dataset(cfg, 3, rhos[1], scenario), simulate_dataset(cfg, 3, rhos[1], scenario)
+    c = simulate_dataset(cfg, 4, rhos[1], scenario)
     identical = all(np.array_equal(getattr(a.train, f), getattr(b.train, f)) for f in ("visits", "time", "event"))
     differs = not np.array_equal(a.train.time, c.train.time)
     print(f"\n[6] dataset 3 simulated twice identical: {identical}; dataset 4 differs from dataset 3: {differs}")

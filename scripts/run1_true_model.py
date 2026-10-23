@@ -3,8 +3,8 @@
 The truth depends on the driver only, so the driver should get essentially all the
 credit and the other visits about zero, at every correlation level.
 
-Writes results/table1_run1.csv (Table 1 rows) and results/log_run1.csv (ties, NaN shares).
-Run from the repository root:  python scripts/run1_true_model.py
+Writes results/scenario_<X>/table1_run1.csv (Table 1 rows) and log_run1.csv (ties, NaN shares).
+Run from the repository root:  python scripts/run1_true_model.py [--scenario B]
 """
 
 import sys
@@ -15,37 +15,39 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))  # use src/
 
 import pandas as pd
 
+from rtds.cli import parse_scenario
 from rtds.config import load_config
 from rtds.explain_dataset import explain_dataset
 from rtds.grid import time_grid
 from rtds.inputs import FlatVisitColumns
-from rtds.results import LOG_COLUMNS, RESULTS_DIR, TABLE1_COLUMNS, append_rows, start_table
+from rtds.results import LOG_COLUMNS, TABLE1_COLUMNS, append_rows, scenario_dir, start_table
 from rtds.simulate import simulate_dataset
 from rtds.true_model import TrueSurvivalModel
 
-SCENARIO = "A"
-VERSION = "forest"  # Part 1 rows; Run 1 explains the truth, not the forest
+VERSION = "forest"  # forest-version rows; Run 1 explains the truth, not the forest
 RUN = 1
 
 
 def main():
+    scenario = parse_scenario(__doc__)
     cfg = load_config()
     sim = cfg["simulation"]
-    driver_col = f"visit_{cfg['scenarios'][SCENARIO]}"
+    driver_col = f"visit_{cfg['scenarios'][scenario]}"
     grid = time_grid(cfg)
     builder = FlatVisitColumns()
     model = TrueSurvivalModel(sim["h0"], sim["b"], driver_col, grid)
 
-    table_path, log_path = RESULTS_DIR / "table1_run1.csv", RESULTS_DIR / "log_run1.csv"
+    out = scenario_dir(scenario)
+    table_path, log_path = out / "table1_run1.csv", out / "log_run1.csv"
     start_table(table_path, TABLE1_COLUMNS)
     start_table(log_path, LOG_COLUMNS)
 
     start = time.perf_counter()
     for rho in sim["rho_levels"]:
         for i in range(cfg["runs"]["run1_n_datasets"]):
-            dataset = simulate_dataset(cfg, i, rho, SCENARIO)
+            dataset = simulate_dataset(cfg, i, rho, scenario)
             rows, log = explain_dataset(cfg, model, dataset, i, builder, grid, driver_col,
-                                        key=(VERSION, SCENARIO, rho, RUN))
+                                        key=(VERSION, scenario, rho, RUN))
             append_rows(table_path, rows, TABLE1_COLUMNS)
             append_rows(log_path, log, LOG_COLUMNS)
             print(f"rho = {rho}, dataset {i}: done ({time.perf_counter() - start:.0f} s elapsed)", flush=True)

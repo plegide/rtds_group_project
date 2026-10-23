@@ -1,6 +1,7 @@
 .venv/
 __pycache__/
 *.pyc
-results/
+# results/ is committed so teammates can use it; only half-written temp files stay out.
+results/**/*.tmp
 # Course PDFs are not ours and stay out of the public repo.
 *.pdf

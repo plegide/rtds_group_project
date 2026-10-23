@@ -4,7 +4,7 @@ The backgrounds are nested: the 100-row one is the real seeded background, the 5
 one is its first half, and larger ones add extra training rows in a seeded order. Each
 size is compared with the largest. This only confirms the setting; it is not a result.
 
-Writes results/background_check.csv (Table 1 columns plus background_size).
+Writes results/scenario_A/background_check.csv (Table 1 columns plus background_size).
 Run from the repository root:  python scripts/stage4_background_check.py
 """
 
@@ -25,7 +25,7 @@ from rtds.forest import ForestModel
 from rtds.grid import time_grid
 from rtds.inputs import FlatVisitColumns
 from rtds.metrics import c_index
-from rtds.results import RESULTS_DIR, TABLE1_COLUMNS
+from rtds.results import TABLE1_COLUMNS, scenario_dir
 from rtds.selection import background_rows
 from rtds.simulate import simulate_dataset
 
@@ -71,7 +71,7 @@ def main():
     seconds = {size: sec for size, _, sec in done}
 
     out = pd.concat(tables.values(), ignore_index=True)
-    out.to_csv(RESULTS_DIR / "background_check.csv", index=False)
+    out.to_csv(scenario_dir(SCENARIO) / "background_check.csv", index=False)
 
     ref_size = max(check["sizes"])
     ref = tables[ref_size].set_index("patient_id")

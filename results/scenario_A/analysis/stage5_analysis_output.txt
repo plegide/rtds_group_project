@@ -1,0 +1,31 @@
+Forest, scenario A (driver visit_3). Means over datasets with 95% bootstrap intervals (10000 resamples of datasets).
+
+rho = 0: 50 datasets, 5000 patients, ties = 0, NaN shares = 0
+  hit rate      0.906 [0.888, 0.923]
+  credit share  0.718 [0.706, 0.729]
+  share per visit: 1 = 0.143 [0.135, 0.152], 2 = 0.139 [0.131, 0.147], 3 = 0.718 [0.706, 0.729]
+  Run 2 drop:      1 = 0.0006 [-0.0002, 0.0015], 2 = 0.0004 [-0.0005, 0.0013], 3 = 0.1690 [0.1642, 0.1738]
+  C-index forest 0.6689 [0.6646, 0.6730], true risk 0.6788 [0.6745, 0.6833]
+
+rho = 0.5: 50 datasets, 5000 patients, ties = 0, NaN shares = 0
+  hit rate      0.900 [0.883, 0.915]
+  credit share  0.715 [0.703, 0.726]
+  share per visit: 1 = 0.147 [0.140, 0.155], 2 = 0.139 [0.130, 0.148], 3 = 0.715 [0.702, 0.726]
+  Run 2 drop:      1 = 0.0014 [0.0002, 0.0027], 2 = 0.0003 [-0.0008, 0.0013], 3 = 0.1682 [0.1631, 0.1736]
+  C-index forest 0.6691 [0.6647, 0.6735], true risk 0.6788 [0.6745, 0.6833]
+
+rho = 0.9: 50 datasets, 5000 patients, ties = 0, NaN shares = 0
+  hit rate      0.876 [0.848, 0.900]
+  credit share  0.672 [0.653, 0.689]
+  share per visit: 1 = 0.167 [0.157, 0.177], 2 = 0.161 [0.147, 0.176], 3 = 0.672 [0.653, 0.688]
+  Run 2 drop:      1 = 0.0015 [-0.0001, 0.0032], 2 = 0.0009 [-0.0006, 0.0025], 3 = 0.1543 [0.1464, 0.1619]
+  C-index forest 0.6680 [0.6635, 0.6727], true risk 0.6788 [0.6746, 0.6834]
+
+Paired Wilcoxon signed-rank tests between rho levels, pairing on dataset: 6 comparisons (2 scores x 3 pairs of rho levels).
+      metric  rho_a  rho_b  n_datasets  mean_a  mean_b  median_diff_b_minus_a  wilcoxon_stat   p_value
+         hit      0    0.5          50   0.906  0.8998                  -0.01          446.5    0.1448
+         hit      0    0.9          50   0.906  0.8758                 -0.015          154.5  0.001002
+         hit    0.5    0.9          50  0.8998  0.8758                  -0.02            309   0.01844
+credit_share      0    0.5          50  0.7177  0.7145             -0.0006927            535    0.3278
+credit_share      0    0.9          50  0.7177  0.6717               -0.03751             91 4.057e-09
+credit_share    0.5    0.9          50  0.7145  0.6717               -0.03409             21  7.94e-13

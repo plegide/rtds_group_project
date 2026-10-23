@@ -6,6 +6,11 @@ import pandas as pd
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
 
+
+def scenario_dir(scenario):
+    """Each scenario keeps its results in its own folder, so B never overwrites A."""
+    return RESULTS_DIR / f"scenario_{scenario}"
+
 TABLE1_COLUMNS = [
     "version", "scenario", "rho", "dataset_seed", "patient_id", "run", "true_driver_visit",
     "credit_visit_1", "credit_visit_2", "credit_visit_3", "top_visit", "hit",

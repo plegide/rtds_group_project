@@ -1,0 +1,4 @@
+version,scenario,rho,dataset_seed,visit,c_index_drop
+forest,A,0.5,20,1,0.01406006899817358
+forest,A,0.5,20,2,-0.0020846016821123303
+forest,A,0.5,20,3,0.16508376739047104

@@ -186,3 +186,12 @@ The forest's settings were also fixed in advance, so neither model is tuned.
 - At correlation 0 and 0.5 the LSTM clearly learned the driver: shuffling it costs 0.14 to 0.19 of C-index, and shuffling the others costs 0.01 or less.
 - At correlation 0.9 the LSTM spreads its reliance over the three similar visits. The driver still matters most, but only by a little (0.035 against 0.023 in A; 0.049 against 0.018 in B), whereas the forest relies on the driver by about 0.16. So at 0.9, credit given to visits 1 and 2 partly reflects what this LSTM really uses, not only a mistake by the tool. Run 2 in the main runs measures this for every dataset, so the two can be told apart.
 - The settings are kept as they are; nothing was changed after the pilot.
+
+## Stage B4: Run 3 for scenario B on one dataset, and the mirror check
+
+**Added:** `src/rtds/mirror.py` compares a scenario's results with scenario A's after relabelling the visits. In B, visit 1 is A's visit 3, visit 2 is A's visit 1 and visit 3 is A's visit 2.
+
+**Checked** (`python scripts/stage4_run3.py --scenario B`, dataset 0; output and check in `results/scenario_B/`)
+- Hit rate 0.96, 0.98 and 0.91, and driver share 0.776, 0.742 and 0.700 at correlation 0, 0.5 and 0.9: exactly scenario A's numbers.
+- Patient by patient (300 patients), B's credits equal A's relabelled credits to within 1 part in 10 million of each patient's total credit, the tool's own rounding. All hits and C-indexes are identical, and the shares agree to 0.00000015.
+- So for the forest, which ignores visit order, it makes no difference whether the driver is the first or the last visit.

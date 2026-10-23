@@ -126,3 +126,9 @@ In scenario B, visit 1 drives the risk and visit 3 is an innocent bystander that
 - Visit 1 (the B driver) got the most credit for every patient at every correlation level: hit rate 1.0, with no ties and no undefined shares.
 - The driver's share is 0.999999914 for every patient. The other visits get at most 0.0000004.
 - The driver's credits are the same as in scenario A (0.155 to 5.502), because these are the same patients. The tiny leftover differs slightly from A's (0.999999875). It is the tool's fixed rounding error, which depends on which column the driver sits in.
+
+## Stage B3: the forest and Run 2 for scenario B
+
+**Checked** (`python scripts/stage3_forest_run2.py --scenario B`, dataset 0)
+- The forest relies on visit 1, the B driver. Shuffling it drops the C-index by 0.171, 0.166 and 0.162 at correlation 0, 0.5 and 0.9; the other visits change it by at most 0.005.
+- The held-out C-index (0.667, 0.665, 0.675) and integrated Brier score (0.187, 0.188, 0.185) are exactly the same as in scenario A. B is the same patients with the visits relabelled, and a forest that considers every visit at every split, with the same seed, builds the same trees. That is the "mirror" the design expects. The Run 2 drops differ slightly from A's because the shuffles are applied in column order, so the driver gets different random shuffles.

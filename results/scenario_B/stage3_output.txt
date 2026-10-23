@@ -1,0 +1,16 @@
+dataset 0, scenario B (driver visit_1), grid 0.3115 to 11.8983
+
+rho = 0.0  (19.0 s)
+  forest range [0.0000, 63.3845] contains the grid: yes
+  held-out C-index = 0.6674, integrated Brier score = 0.1868
+  Run 2, drop in C-index when shuffled: visit_1 = +0.1712, visit_2 = -0.0044, visit_3 = +0.0005
+
+rho = 0.5  (19.0 s)
+  forest range [0.0000, 63.3845] contains the grid: yes
+  held-out C-index = 0.6645, integrated Brier score = 0.1878
+  Run 2, drop in C-index when shuffled: visit_1 = +0.1656, visit_2 = -0.0023, visit_3 = -0.0016
+
+rho = 0.9  (25.2 s)
+  forest range [0.0000, 63.3845] contains the grid: yes
+  held-out C-index = 0.6748, integrated Brier score = 0.1852
+  Run 2, drop in C-index when shuffled: visit_1 = +0.1616, visit_2 = +0.0010, visit_3 = +0.0003

@@ -119,3 +119,10 @@ In scenario B, visit 1 drives the risk and visit 3 is an innocent bystander that
 - Censoring 30.0%, correlations within 0.003 of each level, and Kaplan-Meier within 0.003 of the true curve. These are the same numbers as in scenario A.
 - A Cox model now puts the effect on visit 1 (0.690 to 0.692; true value 0.693) and at most 0.007 in size on visits 2 and 3.
 - New check: for all 50 datasets at all 3 correlation levels, the patients' event times, censoring and driver values are identical to scenario A's (visit 1 in B equals visit 3 in A). Scenario A and B therefore use exactly the same patients and can be compared in pairs.
+
+## Stage B2: Run 1 for scenario B (the tool on the true curve)
+
+**Checked** (`python scripts/run1_true_model.py --scenario B`, 1,500 explanations, about 4 minutes)
+- Visit 1 (the B driver) got the most credit for every patient at every correlation level: hit rate 1.0, with no ties and no undefined shares.
+- The driver's share is 0.999999914 for every patient. The other visits get at most 0.0000004.
+- The driver's credits are the same as in scenario A (0.155 to 5.502), because these are the same patients. The tiny leftover differs slightly from A's (0.999999875). It is the tool's fixed rounding error, which depends on which column the driver sits in.

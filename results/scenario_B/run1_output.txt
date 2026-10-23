@@ -1,0 +1,21 @@
+rho = 0.0, dataset 0: done (5 s elapsed)
+rho = 0.0, dataset 1: done (11 s elapsed)
+rho = 0.0, dataset 2: done (16 s elapsed)
+rho = 0.0, dataset 3: done (21 s elapsed)
+rho = 0.0, dataset 4: done (27 s elapsed)
+rho = 0.5, dataset 0: done (32 s elapsed)
+rho = 0.5, dataset 1: done (37 s elapsed)
+rho = 0.5, dataset 2: done (42 s elapsed)
+rho = 0.5, dataset 3: done (53 s elapsed)
+rho = 0.5, dataset 4: done (64 s elapsed)
+rho = 0.9, dataset 0: done (69 s elapsed)
+rho = 0.9, dataset 1: done (74 s elapsed)
+rho = 0.9, dataset 2: done (79 s elapsed)
+rho = 0.9, dataset 3: done (84 s elapsed)
+rho = 0.9, dataset 4: done (88 s elapsed)
+
+Run 1 summary (1500 explained patients; average over patients per dataset, then over datasets)
+  rho = 0.0: hit = 1.0000, credit share = 0.999999914, lowest single-patient share = 0.999999914, largest non-driver credit = 3.84e-07, driver credit range = 0.155 to 5.502
+  rho = 0.5: hit = 1.0000, credit share = 0.999999914, lowest single-patient share = 0.999999914, largest non-driver credit = 3.84e-07, driver credit range = 0.155 to 5.502
+  rho = 0.9: hit = 1.0000, credit share = 0.999999914, lowest single-patient share = 0.999999914, largest non-driver credit = 3.84e-07, driver credit range = 0.155 to 5.502
+  ties logged: 0, NaN shares logged: 0

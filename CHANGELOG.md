@@ -195,3 +195,16 @@ The forest's settings were also fixed in advance, so neither model is tuned.
 - Hit rate 0.96, 0.98 and 0.91, and driver share 0.776, 0.742 and 0.700 at correlation 0, 0.5 and 0.9: exactly scenario A's numbers.
 - Patient by patient (300 patients), B's credits equal A's relabelled credits to within 1 part in 10 million of each patient's total credit, the tool's own rounding. All hits and C-indexes are identical, and the shares agree to 0.00000015.
 - So for the forest, which ignores visit order, it makes no difference whether the driver is the first or the last visit.
+
+## Stage B5: the forest on scenario B, mirror test on 5 datasets
+
+You decided on 23 October that the forest on scenario B is a mirror test only, not 50 datasets.
+
+**Added:** `scripts/stageB5_forest_mirror.py` runs the full main-run pipeline (forest, Run 2, Run 3) for datasets 0 to 4 at every correlation level in scenario B (15 tasks, 6 in parallel, 17 minutes). It then compares every explained patient with scenario A after relabelling the visits. Output is in `results/scenario_B/` (`table1_mirror.csv`, `table2_mirror.csv`, `mirror_check.csv`, `stageB5_mirror_output.txt`).
+
+**Checked** (1,500 patients)
+- Hit rate and credit share on these 5 datasets are identical to scenario A's to 4 decimals at every level (for example 0.928 and 0.715 at correlation 0.9).
+- Every hit and every held-out C-index is identical.
+- In 14 of the 15 dataset-level runs, the credits match A's relabelled credits to within 1 part in 10 million, the tool's own rounding.
+- The exception is dataset 1 at correlation 0.9, where the credits differ by up to 0.09% of a patient's total and the shares by up to 0.0006. The forests themselves differ slightly there: their predictions differ for 7 of 500 test patients, by at most 0.0024 in survival probability. The most likely cause is an exact tie between two equally good splits, which the forest breaks by column order. That is a detail of the software, not a difference between the scenarios.
+- Conclusion: for the forest it does not matter whether the driver is the first or the last visit. The final analysis uses the forest's scenario A results, relabelled, as its scenario B results.

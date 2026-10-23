@@ -62,3 +62,7 @@ batch_size = 64                   # about 13 updates per epoch on 800 patients
 max_epochs = 300                  # upper bound only; early stopping decides
 patience = 20                     # stop after 20 epochs without a better validation loss
 val_fraction = 0.2                # 200 of the 1,000 training patients, for early stopping only
+
+[mirror]
+# Scenario B with the forest is only a mirror test of scenario A (decided 23 October).
+n_datasets = 5                    # datasets 0-4 at every rho, compared patient by patient with scenario A

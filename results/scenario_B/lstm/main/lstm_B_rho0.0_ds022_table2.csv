@@ -1,0 +1,4 @@
+version,scenario,rho,dataset_seed,visit,c_index_drop
+lstm,B,0.0,22,1,0.15060800858633716
+lstm,B,0.0,22,2,-0.003694865324670893
+lstm,B,0.0,22,3,-0.0011258149598657452

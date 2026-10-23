@@ -1,0 +1,12 @@
+Forest, scenario B, datasets 0-4: 1500 explained patients compared with scenario A (visits relabelled)
+ rho  rows_matched  max_relative_credit_diff  hits_identical  max_share_diff  c_index_identical
+   0           500                  9.29e-08            True        1.58e-07               True
+ 0.5           500                  9.53e-08            True        1.61e-07               True
+ 0.9           500                  0.000857            True        0.000562               True
+
+hit rate and credit share on these datasets, B vs A:
+       hit  credit_share  hit_A  credit_share_A
+rho                                            
+0.0 0.9380        0.7490 0.9380          0.7490
+0.5 0.9360        0.7416 0.9360          0.7416
+0.9 0.9280        0.7147 0.9280          0.7147

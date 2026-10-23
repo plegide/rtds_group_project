@@ -7,9 +7,11 @@ import pandas as pd
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
 
 
-def scenario_dir(scenario):
-    """Each scenario keeps its results in its own folder, so B never overwrites A."""
-    return RESULTS_DIR / f"scenario_{scenario}"
+def scenario_dir(scenario, version="forest"):
+    """Each scenario keeps its results in its own folder, so B never overwrites A.
+    Forest results sit at the top of that folder (Part 1); LSTM results in its lstm/ subfolder."""
+    base = RESULTS_DIR / f"scenario_{scenario}"
+    return base if version == "forest" else base / version
 
 TABLE1_COLUMNS = [
     "version", "scenario", "rho", "dataset_seed", "patient_id", "run", "true_driver_visit",

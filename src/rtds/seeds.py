@@ -18,6 +18,7 @@ PURPOSES = {
     "shuffle": 5,     # Run 2 column shuffles
     "background_check": 6,  # extra background rows for the Stage 4 size check
     "bootstrap": 7,   # resampling datasets in the analysis
+    "lstm": 8,        # LSTM weights, validation split and batch order
 }
 
 

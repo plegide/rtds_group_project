@@ -53,3 +53,12 @@ sizes = [50, 100, 200, 500]       # nested: each background contains the smaller
 [analysis]
 n_bootstrap = 10000               # resamples of datasets (never of patients)
 ci_level = 0.95
+
+[lstm]
+# Part 2. Chosen once (user delegated the choice, 23 October), fixed after the pilot, never tuned per setting.
+hidden_size = 16                  # 3 scalar inputs, 800 training patients: a small layer avoids overfitting
+learning_rate = 0.005             # Adam; fast enough for a tiny network, stable on 800 patients
+batch_size = 64                   # about 13 updates per epoch on 800 patients
+max_epochs = 300                  # upper bound only; early stopping decides
+patience = 20                     # stop after 20 epochs without a better validation loss
+val_fraction = 0.2                # 200 of the 1,000 training patients, for early stopping only

@@ -1,0 +1,8 @@
+fit: 6.6 s, stopped after 52 epochs (best epoch 32)
+[1] predictions identical after reordering the columns: True
+[2] 500 StepFunctions, values in [0.0008, 0.9869], never increasing: True
+[3] two fits with the same seed give identical predictions: True
+[4] SurvSHAP(t) ran; credit per visit: visit_1 = 0.5254, visit_2 = 0.1130, visit_3 = 0.3814
+[5] max |sum of SurvSHAP(t) - (patient survival - background mean)| over the grid = 5.48e-08
+[6] one explanation: 0.110 s
+All LSTM wrapper checks passed.

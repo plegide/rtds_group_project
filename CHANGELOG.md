@@ -132,3 +132,22 @@ In scenario B, visit 1 drives the risk and visit 3 is an innocent bystander that
 **Checked** (`python scripts/stage3_forest_run2.py --scenario B`, dataset 0)
 - The forest relies on visit 1, the B driver. Shuffling it drops the C-index by 0.171, 0.166 and 0.162 at correlation 0, 0.5 and 0.9; the other visits change it by at most 0.005.
 - The held-out C-index (0.667, 0.665, 0.675) and integrated Brier score (0.187, 0.188, 0.185) are exactly the same as in scenario A. B is the same patients with the visits relabelled, and a forest that considers every visit at every split, with the same seed, builds the same trees. That is the "mirror" the design expects. The Run 2 drops differ slightly from A's because the shuffles are applied in column order, so the driver gets different random shuffles.
+
+## Stage 6a: the LSTM and its wrapper, tested with the tool
+
+**Added**
+- PyTorch, CPU-only build, in `requirements.txt`. The file now points pip to PyTorch's own package index, so a clean install still works.
+- `src/rtds/lstm_net.py`: the network. One small LSTM layer reads the three visits in order (visit 1 first, visit 3 last). A head turns the final state into 50 hazards, one per time interval of the grid. The survival curve is the running product of (1 - hazard). It is trained on the censored likelihood: an event in interval k counts the hazard of interval k and survival through all earlier intervals; a censored patient counts survival through the intervals before censoring.
+- `src/rtds/lstm_model.py`: the wrapper. It takes the same flat columns as the forest, puts them in visit order by name inside, trains with early stopping on 20% of the training patients, and returns sksurv step functions on the grid. So SurvSHAP(t), Run 2 and the scoring code work on it unchanged. Its risk score for the C-index is the area under its survival curve, with the sign flipped.
+- `src/rtds/models.py`: picks the forest or the LSTM by name. The main-run and analysis scripts take `--model forest` (the default) or `--model lstm`. LSTM results go to `results/scenario_<X>/lstm/`.
+- `scripts/stage6a_lstm_wrapper_test.py`.
+
+**Checked** (dataset 0, correlation 0.9, scenario A; output in `results/scenario_A/lstm/stage6a_wrapper_test_output.txt`)
+- The wrapper reads the visits by name: shuffling the column order gives identical predictions.
+- 500 survival curves are proper sksurv step functions, between 0 and 1 and never increasing.
+- Two fits with the same seed give identical predictions.
+- SurvSHAP(t) runs on the wrapper unchanged and returns one credit per visit.
+- The credits add up: at every grid time, the sum of the three visits' SurvSHAP(t) values equals the patient's predicted survival minus the background average, to within 0.00000005.
+- One fit takes about 7 seconds and one explanation 0.11 seconds, about 20 times faster than on the forest.
+
+**Fixed:** `scripts/stage4_run3.py` had a broken line after the scenario change in the previous commit, so it could not run. It is fixed and was rerun for scenario B (Stage B4).

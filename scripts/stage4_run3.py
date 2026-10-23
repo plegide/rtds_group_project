@@ -72,8 +72,7 @@ def main():
 
         t = pd.DataFrame(rows, columns=TABLE1_COLUMNS)
         credit_cols = ["credit_visit_1", "credit_visit_2", "credit_visit_3"]
-        print(f"
-rho = {rho}: C-index = {c:.4f}; Run 2 drops: "
+        print(f"\nrho = {rho}: C-index = {c:.4f}; Run 2 drops: "
               + ", ".join(f"{k} = {d:+.4f}" for k, d in drops.items()))
         print(f"  {len(t)} patients explained in {elapsed:.0f} s ({elapsed / len(t):.2f} s per patient)")
         print(f"  first {N_SHOWN} patients:")

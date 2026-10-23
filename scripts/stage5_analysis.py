@@ -1,12 +1,12 @@
-"""Stage 5: analysis of the forest main runs for one scenario.
+"""Stage 5: analysis of the main runs for one scenario and one model.
 
 Reads the merged main-run tables, averages over patients within each dataset, then
 summarises over datasets per rho with bootstrap intervals (datasets resampled, never
 patients), runs paired Wilcoxon tests between rho levels, and draws the figures.
 
 Writes analysis/summary_by_rho.csv, analysis/paired_tests.csv, analysis/per_dataset.csv and
-figures/*.png in results/scenario_<X>/.
-Run from the repository root after stage5_main_runs.py:  python scripts/stage5_analysis.py [--scenario B]
+figures/*.png in the results folder of that scenario and model.
+Run from the repository root after stage5_main_runs.py:  python scripts/stage5_analysis.py [--scenario B] [--model lstm]
 """
 
 import sys
@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))  # use src/
 import pandas as pd
 
 from rtds import seeds
-from rtds.cli import parse_scenario
+from rtds.cli import parse_scenario_and_model
 from rtds.config import load_config
 from rtds.figures import interval_by_rho, per_visit_panels
 from rtds.results import scenario_dir
@@ -27,9 +27,9 @@ TESTED = ["hit", "credit_share"]  # the two scores compared between rho levels
 
 
 def main():
-    scenario = parse_scenario(__doc__)
+    scenario, version = parse_scenario_and_model(__doc__)
     cfg = load_config()
-    base = scenario_dir(scenario)
+    base = scenario_dir(scenario, version)
     driver = cfg["scenarios"][scenario]
     a = cfg["analysis"]
     rhos = list(cfg["simulation"]["rho_levels"])
@@ -68,15 +68,15 @@ def main():
     per_ds.to_csv(out / "per_dataset.csv", index=False)
 
     interval_by_rho(summary, "hit", "Hit rate (driver gets most credit)",
-                    f"Hit rate (Run 3, scenario {scenario})", figs / "fig1_hit_rate.png",
+                    f"Hit rate ({version}, scenario {scenario})", figs / "fig1_hit_rate.png",
                     per_ds=per_ds, chance=1 / 3)
     interval_by_rho(summary, "credit_share", "Driver's share of credit",
-                    f"Driver's credit share (Run 3, scenario {scenario})", figs / "fig2_credit_share.png",
+                    f"Driver's credit share ({version}, scenario {scenario})", figs / "fig2_credit_share.png",
                     per_ds=per_ds)
     per_visit_panels(summary, figs / "fig3_per_visit.png", driver)
 
     pct = int(a["ci_level"] * 100)
-    print(f"Forest, scenario {scenario} (driver visit_{driver}). Means over datasets with {pct}% bootstrap intervals "
+    print(f"{version}, scenario {scenario} (driver visit_{driver}). Means over datasets with {pct}% bootstrap intervals "
           f"({a['n_bootstrap']} resamples of datasets).")
     for _, r in summary.iterrows():
         f = lambda m, d=3: f"{r[m + '_mean']:.{d}f} [{r[m + '_lo']:.{d}f}, {r[m + '_hi']:.{d}f}]"

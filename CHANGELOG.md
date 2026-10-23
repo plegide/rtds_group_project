@@ -104,3 +104,18 @@ What each stage adds to the project, in plain language.
 - Run 2 shows the forest hardly uses visits 1 and 2 at any level (drops of 0.002 or less). Its reliance on visit 3 also falls a little at 0.9 (0.169 to 0.154). So part of the change at 0.9 may come from the forest itself, not only from the tool.
 - The forest's C-index is about 0.01 below the true-risk C-index at every level, so the model is close to the best possible.
 - Check: dataset 0 in the main runs gives the same hits, shares and C-indexes as Stage 4. 5 of its 300 credit values differ in the last binary digit (4e-16).
+
+## Before scenario B: results on GitHub, one folder per scenario
+
+- The `results/` folder is now stored in git (about 5.5 MB), so teammates can use the tables and figures without rerunning anything.
+- Each scenario has its own folder: `results/scenario_A/` (everything from Stages 1 to 5, moved there unchanged) and `results/scenario_B/`. Rerunning the scenario A analysis from the new folder gave byte-identical tables.
+- The run scripts take `--scenario A` (the default) or `--scenario B`.
+
+## Stage B1: the simulator for scenario B
+
+In scenario B, visit 1 drives the risk and visit 3 is an innocent bystander that is correlated with it. The forest sees the visits as unordered columns, so for the forest B should mirror A. Order starts to matter only for the LSTM in Part 2.
+
+**Checked** (`python scripts/check_simulator.py --scenario B`, output in `results/scenario_B/check_simulator_output.txt`)
+- Censoring 30.0%, correlations within 0.003 of each level, and Kaplan-Meier within 0.003 of the true curve. These are the same numbers as in scenario A.
+- A Cox model now puts the effect on visit 1 (0.690 to 0.692; true value 0.693) and at most 0.007 in size on visits 2 and 3.
+- New check: for all 50 datasets at all 3 correlation levels, the patients' event times, censoring and driver values are identical to scenario A's (visit 1 in B equals visit 3 in A). Scenario A and B therefore use exactly the same patients and can be compared in pairs.

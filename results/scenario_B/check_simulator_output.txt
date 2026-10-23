@@ -1,0 +1,29 @@
+large sample: 100000 patients; scenario B, driver = visit_1
+
+[1] solved censoring rate = 0.039239; censored fraction by quadrature = 0.300000 (target 0.3)
+    large sample: censored = 0.3004, events = 0.6996 (binomial SE 0.0014)
+    50 training sets: censored mean = 0.3012, min = 0.2730, max = 0.3310
+
+[2] off-diagonal correlations between visits (large sample)
+    rho = 0.0: corr(1,2) = -0.0025, corr(1,3) = -0.0019, corr(2,3) = 0.0007; marginal sd = [0.999  0.996  1.0026]
+    rho = 0.5: corr(1,2) = 0.4995, corr(1,3) = 0.4971, corr(2,3) = 0.4978; marginal sd = [0.999  0.9956 1.0002]
+    rho = 0.9: corr(1,2) = 0.9003, corr(1,3) = 0.8993, corr(2,3) = 0.8995; marginal sd = [0.999  0.9974 0.9983]
+
+[3] 50 datasets: times, events and driver visit bit-identical across rho [0.0, 0.5, 0.9]: True
+
+[4] time grid: 50 points from 0.3115 to 11.8983
+    max |KM - true S(t)| on grid = 0.0027 at t = 10.480 (true S there = 0.3593)
+    t =   0.312: KM = 0.9619, true = 0.9616
+    t =   6.223: KM = 0.5147, true = 0.5160
+    t =  11.898: KM = 0.3200, true = 0.3218
+
+[5] Cox coefficients on the large sample (true: visit_1 = ln 2 = 0.6931, others 0)
+    rho = 0.0: visit_1 = +0.6901, visit_2 = +0.0006, visit_3 = -0.0028
+    rho = 0.5: visit_1 = +0.6909, visit_2 = +0.0018, visit_3 = -0.0034
+    rho = 0.9: visit_1 = +0.6924, visit_2 = +0.0047, visit_3 = -0.0072
+
+[6] dataset 3 simulated twice identical: True; dataset 4 differs from dataset 3: True
+
+[7] 50 datasets x 3 rho: times, events and driver values bit-identical to scenario A (visit_1 here = visit_3 there): True
+
+All simulator checks passed.

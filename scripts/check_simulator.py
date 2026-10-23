@@ -6,6 +6,7 @@
 4. Kaplan-Meier of a large sample matches the population survival curve.
 5. A Cox model on a large sample puts the effect on the driver and about zero elsewhere.
 6. The same seed gives identical data.
+7. (Scenario B only) Same patients as scenario A: identical times, events and driver values.
 
 Run from the repository root:  python scripts/check_simulator.py [--scenario B]
 """
@@ -106,6 +107,21 @@ def main():
     differs = not np.array_equal(a.train.time, c.train.time)
     print(f"\n[6] dataset 3 simulated twice identical: {identical}; dataset 4 differs from dataset 3: {differs}")
     assert identical and differs
+
+    # 7. Same patients as scenario A (the driver is built from the same base normal in both)
+    if scenario != "A":
+        driver_a = cfg["scenarios"]["A"]
+        same = True
+        for i in range(n_datasets):
+            for rho in rhos:
+                a, b = simulate_dataset(cfg, i, rho, "A"), simulate_dataset(cfg, i, rho, scenario)
+                for part in ("train", "test"):
+                    pa, pb = getattr(a, part), getattr(b, part)
+                    same &= np.array_equal(pa.time, pb.time) and np.array_equal(pa.event, pb.event)
+                    same &= np.array_equal(pa.visits[:, driver_a - 1], pb.visits[:, driver - 1])
+        print(f"\n[7] {n_datasets} datasets x {len(rhos)} rho: times, events and driver values bit-identical "
+              f"to scenario A (visit_{driver} here = visit_{driver_a} there): {same}")
+        assert same
 
     print("\nAll simulator checks passed.")
 

@@ -78,10 +78,11 @@ LSTM (Part 2 only, Stage 6)
 4. Run 3 on one dataset at each correlation level, plus the one-dataset background-size check. Show per-visit credit for a few patients and the hit rate and credit share. Stop for my review.
 5. Main runs for the forest, scenario A: 3 correlation levels x 50 datasets, model refitted each time, results saved after every dataset so a crash loses nothing, parallel where useful.
    Also record, per dataset, the held-out C-index of the true risk score (the driver visit) as a fixed reference for the forest's C-index (added after Stage 3). Then a first analysis of Part 1 (tables, figures, the tests above). Stop for my review. Part 1 must be complete and usable on its own at this point.
-6. LSTM (Part 2), only after I accept Part 1. 6a: build the wrapper and test it with the tool. 6b: propose the LSTM settings and wait. 6c: pilot on one dataset, check it learned the driver. 6d: main runs for both models, scenarios A and B, 3 correlation levels x 50 datasets. Stop after each sub-step.
+6. LSTM (Part 2), only after I accept Part 1. (Part 1 accepted on 23 October. Order agreed then: first the forest on scenario B as stages B1-B5, mirroring Stages 1-5 with --scenario B; then 6a-6d and Stage 7 without stopping between stages, one commit and push per stage. The LSTM settings in 6b still need my approval.) 6a: build the wrapper and test it with the tool. 6b: propose the LSTM settings and wait. 6c: pilot on one dataset, check it learned the driver. 6d: main runs for both models, scenarios A and B, 3 correlation levels x 50 datasets. Stop after each sub-step.
 7. Final analysis: tables, figures and the tests above, including forest versus LSTM and scenario A versus B. Every number in the report must be regenerable by one script.
 
 ## Results tables (same columns in every version)
+All results live in results/scenario_<X>/ and are committed to git (decided 23 October).
 Table 1, one row per explained patient per dataset: version (forest or lstm), scenario, correlation level, dataset seed, patient id, run (1 or 3), true driver visit, credit for visit 1, 2 and 3, top visit, hit, credit share of the true driver, held-out C-index of that dataset (blank for Run 1 rows).
 Table 2, one row per visit per dataset (Run 2): version, scenario, correlation level, dataset seed, visit, drop in C-index when that visit is shuffled.
 

@@ -1,0 +1,2 @@
+version,scenario,rho,dataset_seed,heldout_c_index,true_risk_c_index
+lstm,A,0.0,45,0.6452698911457749,0.654864773874986

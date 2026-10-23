@@ -1,0 +1,31 @@
+lstm, scenario A (driver visit_3). Means over datasets with 95% bootstrap intervals (10000 resamples of datasets).
+
+rho = 0: 50 datasets, 5000 patients, ties = 0, NaN shares = 0
+  hit rate      0.938 [0.915, 0.955]
+  credit share  0.801 [0.777, 0.823]
+  share per visit: 1 = 0.070 [0.059, 0.083], 2 = 0.128 [0.113, 0.145], 3 = 0.801 [0.776, 0.822]
+  Run 2 drop:      1 = 0.0004 [-0.0002, 0.0012], 2 = -0.0003 [-0.0012, 0.0006], 3 = 0.1762 [0.1706, 0.1814]
+  C-index lstm 0.6754 [0.6703, 0.6802], true risk 0.6788 [0.6745, 0.6833]
+
+rho = 0.5: 50 datasets, 5000 patients, ties = 0, NaN shares = 0
+  hit rate      0.919 [0.881, 0.945]
+  credit share  0.770 [0.737, 0.798]
+  share per visit: 1 = 0.089 [0.073, 0.109], 2 = 0.141 [0.124, 0.158], 3 = 0.770 [0.736, 0.799]
+  Run 2 drop:      1 = 0.0004 [-0.0007, 0.0021], 2 = 0.0007 [-0.0001, 0.0015], 3 = 0.1564 [0.1487, 0.1631]
+  C-index lstm 0.6752 [0.6704, 0.6799], true risk 0.6788 [0.6745, 0.6833]
+
+rho = 0.9: 50 datasets, 5000 patients, ties = 0, NaN shares = 0
+  hit rate      0.336 [0.251, 0.423]
+  credit share  0.323 [0.290, 0.359]
+  share per visit: 1 = 0.375 [0.343, 0.408], 2 = 0.302 [0.295, 0.308], 3 = 0.323 [0.289, 0.359]
+  Run 2 drop:      1 = 0.0317 [0.0251, 0.0383], 2 = 0.0142 [0.0130, 0.0155], 3 = 0.0311 [0.0249, 0.0377]
+  C-index lstm 0.6714 [0.6668, 0.6761], true risk 0.6788 [0.6746, 0.6834]
+
+Paired Wilcoxon signed-rank tests between rho levels, pairing on dataset: 6 comparisons (2 scores x 3 pairs of rho levels).
+      metric  rho_a  rho_b  n_datasets  mean_a  mean_b  median_diff_b_minus_a  wilcoxon_stat   p_value
+         hit      0    0.5          50   0.938  0.9186                  -0.01            349    0.1339
+         hit      0    0.9          50   0.938  0.3364                 -0.705              1 8.008e-10
+         hit    0.5    0.9          50  0.9186  0.3364                 -0.645              0 7.535e-10
+credit_share      0    0.5          50  0.8015  0.7696               -0.03327            368  0.008588
+credit_share      0    0.9          50  0.8015  0.3232                -0.5117              0 1.776e-15
+credit_share    0.5    0.9          50  0.7696  0.3232                -0.4492              0 1.776e-15

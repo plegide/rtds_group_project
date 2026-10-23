@@ -208,3 +208,29 @@ You decided on 23 October that the forest on scenario B is a mirror test only, n
 - In 14 of the 15 dataset-level runs, the credits match A's relabelled credits to within 1 part in 10 million, the tool's own rounding.
 - The exception is dataset 1 at correlation 0.9, where the credits differ by up to 0.09% of a patient's total and the shares by up to 0.0006. The forests themselves differ slightly there: their predictions differ for 7 of 500 test patients, by at most 0.0024 in survival probability. The most likely cause is an exact tie between two equally good splits, which the forest breaks by column order. That is a detail of the software, not a difference between the scenarios.
 - Conclusion: for the forest it does not matter whether the driver is the first or the last visit. The final analysis uses the forest's scenario A results, relabelled, as its scenario B results.
+
+## Stage 6d: LSTM main runs, scenarios A and B
+
+**Done** (`python scripts/stage5_main_runs.py --scenario A --model lstm`, then `--scenario B`, followed by `stage5_analysis.py` for each): 50 datasets x 3 correlation levels per scenario, the LSTM refitted for every dataset, 100 explained patients each, giving 30,000 explanations. Six datasets ran in parallel, about 5 minutes per scenario. Results are in `results/scenario_<X>/lstm/`.
+
+**Results** (means over 50 datasets, 95% intervals in brackets)
+
+| Scenario | Correlation | Hit rate | Driver's share | Run 2 drop: driver | Run 2 drop: other visits | LSTM C-index |
+|---|---|---|---|---|---|---|
+| A (driver = visit 3, read last) | 0 | 0.938 [0.915, 0.955] | 0.801 | 0.176 | 0.000, -0.000 | 0.675 |
+| A | 0.5 | 0.919 [0.881, 0.945] | 0.770 | 0.156 | 0.000, 0.001 | 0.675 |
+| A | 0.9 | 0.336 [0.251, 0.423] | 0.323 | 0.031 | visit 1: 0.032, visit 2: 0.014 | 0.671 |
+| B (driver = visit 1, read first) | 0 | 0.853 [0.837, 0.869] | 0.691 | 0.170 | -0.001, -0.001 | 0.669 |
+| B | 0.5 | 0.777 [0.754, 0.800] | 0.595 | 0.126 | 0.004, 0.001 | 0.668 |
+| B | 0.9 | 0.769 [0.749, 0.789] | 0.483 | 0.064 | 0.014, 0.006 | 0.675 |
+
+No ties and no undefined shares among the 30,000 patients. The true-risk C-index is 0.679 throughout.
+
+**Flag: in scenario A at correlation 0.9 the LSTM did not learn the driver specifically.** Shuffling visit 1 hurts it as much as shuffling the true driver, visit 3 (0.032 against 0.031). Its predictions are still good (C-index 0.671), because with visits this similar any of them predicts the risk. SurvSHAP(t)'s hit rate there is 0.336, which is chance level. That mostly reflects a model that does not single out the driver, rather than a tool error, and the results must be read that way.
+
+**What stands out**
+- Order matters for the LSTM. With the driver read first (scenario B), the tool gives visit 2 about 21% of the credit even at correlation 0, while shuffling visit 2 does not change the C-index at all. The hit rate is 0.853 in B against 0.938 in A at correlation 0.
+- In scenario B the LSTM keeps relying mostly on the driver even at 0.9 (drop 0.064 against at most 0.014 for the others), and the hit rate stays at 0.77.
+- Within each scenario, the scores get worse as correlation rises (paired Wilcoxon p-values are in `results/scenario_<X>/lstm/analysis/paired_tests.csv`). The only exceptions are the hit rate between 0 and 0.5 in A (p = 0.13) and between 0.5 and 0.9 in B (p = 0.82).
+
+**Fixed:** the analysis printout labelled the C-index line "forest" for every model; it now shows the model's name.

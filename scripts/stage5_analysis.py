@@ -86,7 +86,7 @@ def main():
         print(f"  credit share  {f('credit_share')}")
         print(f"  share per visit: 1 = {f('share_visit_1')}, 2 = {f('share_visit_2')}, 3 = {f('share_visit_3')}")
         print(f"  Run 2 drop:      1 = {f('drop_visit_1', 4)}, 2 = {f('drop_visit_2', 4)}, 3 = {f('drop_visit_3', 4)}")
-        print(f"  C-index forest {f('heldout_c_index', 4)}, true risk {f('true_risk_c_index', 4)}")
+        print(f"  C-index {version} {f('heldout_c_index', 4)}, true risk {f('true_risk_c_index', 4)}")
 
     print(f"\nPaired Wilcoxon signed-rank tests between rho levels, pairing on dataset: "
           f"{len(tests)} comparisons ({len(TESTED)} scores x {len(tests) // len(TESTED)} pairs of rho levels).")

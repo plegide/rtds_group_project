@@ -253,5 +253,12 @@ No ties and no undefined shares among the 30,000 patients. The true-risk C-index
 
 - Forest vs LSTM: every comparison differs (Holm-adjusted p at most 0.025). With the driver read last (A), the LSTM's explanations are better than the forest's at 0 and 0.5. With the driver read first (B), they are worse at every level.
 - LSTM, scenario A vs B: they differ at every level (Holm-adjusted p at most 7e-7). At 0 and 0.5, A is better. At 0.9, B is better, because in A the LSTM itself stopped singling out the driver (see Stage 6d).
-- Between correlation levels, 15 of 18 comparisons stay below 0.05 after Holm adjustment. The exceptions are the forest's hit rate from 0 to 0.5 and from 0.5 to 0.9, and the LSTM's hit rate from 0.5 to 0.9 in scenario B. The LSTM's credit share from 0 to 0.5 in A has a raw p of 0.009, but 0.052 after Holm.
+- Between correlation levels, 12 of 18 comparisons stay below 0.05 after Holm adjustment. The 6 that do not:
+  - the forest's hit rate and credit share from 0 to 0.5;
+  - the forest's hit rate from 0.5 to 0.9 (raw p 0.018);
+  - the LSTM's hit rate and credit share from 0 to 0.5 in scenario A (credit share raw p 0.009);
+  - the LSTM's hit rate from 0.5 to 0.9 in scenario B.
+
+  So moving from 0 to 0.5 changes little. The clear changes come at 0.9.
+- Correction: the first version of this section said 15 of 18. Recounting from `results/final/tests.csv` gives 12.
 - Run 1 (true curve) gives the driver all the credit in both scenarios (share 0.999999875 in A, 0.999999914 in B).

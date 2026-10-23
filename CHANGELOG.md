@@ -168,3 +168,21 @@ You delegated the choice on 23 October. The settings are fixed after the pilot (
 | Seed | from the master seed, by dataset number | Same weights, validation split and batch order every run; one thread per model for reproducibility. |
 
 The forest's settings were also fixed in advance, so neither model is tuned.
+
+## Stage 6c: LSTM pilot on one dataset
+
+**Checked** (`python scripts/stage6c_lstm_pilot.py`, dataset 0, both scenarios, all correlation levels, 6 fits in parallel; output in `results/scenario_<X>/lstm/`)
+
+| Scenario | Correlation | LSTM C-index | Forest C-index | LSTM Brier (IBS) | Forest Brier | Run 2 drop, driver | Run 2 drop, other two visits |
+|---|---|---|---|---|---|---|---|
+| A | 0 | 0.682 | 0.667 | 0.182 | 0.187 | 0.186 | -0.001, -0.001 |
+| A | 0.5 | 0.683 | 0.665 | 0.181 | 0.188 | 0.177 | -0.000, 0.000 |
+| A | 0.9 | 0.676 | 0.675 | 0.186 | 0.185 | 0.035 | 0.023, 0.014 |
+| B | 0 | 0.673 | 0.667 | 0.184 | 0.187 | 0.172 | 0.000, -0.002 |
+| B | 0.5 | 0.675 | 0.665 | 0.184 | 0.188 | 0.136 | 0.010, 0.000 |
+| B | 0.9 | 0.678 | 0.675 | 0.185 | 0.185 | 0.049 | 0.018, 0.013 |
+
+- The LSTM predicts as well as the forest or slightly better, at every level and in both scenarios. Training stopped after 52 to 92 epochs (about 9 to 11 seconds).
+- At correlation 0 and 0.5 the LSTM clearly learned the driver: shuffling it costs 0.14 to 0.19 of C-index, and shuffling the others costs 0.01 or less.
+- At correlation 0.9 the LSTM spreads its reliance over the three similar visits. The driver still matters most, but only by a little (0.035 against 0.023 in A; 0.049 against 0.018 in B), whereas the forest relies on the driver by about 0.16. So at 0.9, credit given to visits 1 and 2 partly reflects what this LSTM really uses, not only a mistake by the tool. Run 2 in the main runs measures this for every dataset, so the two can be told apart.
+- The settings are kept as they are; nothing was changed after the pilot.

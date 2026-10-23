@@ -1,0 +1,16 @@
+
+Scenario A (driver visit_3), dataset 0
+  rho = 0.0: LSTM stopped at epoch 58 (best 38, 9.0 s); C-index LSTM 0.6819 vs forest 0.6674; IBS LSTM 0.1821 vs forest 0.1868
+            LSTM Run 2 drops: visit_1 = -0.0006, visit_2 = -0.0008, visit_3 = +0.1857
+  rho = 0.5: LSTM stopped at epoch 92 (best 72, 11.1 s); C-index LSTM 0.6829 vs forest 0.6645; IBS LSTM 0.1808 vs forest 0.1878
+            LSTM Run 2 drops: visit_1 = -0.0002, visit_2 = +0.0002, visit_3 = +0.1773
+  rho = 0.9: LSTM stopped at epoch 52 (best 32, 8.5 s); C-index LSTM 0.6760 vs forest 0.6748; IBS LSTM 0.1856 vs forest 0.1852
+            LSTM Run 2 drops: visit_1 = +0.0228, visit_2 = +0.0143, visit_3 = +0.0345
+
+Scenario B (driver visit_1), dataset 0
+  rho = 0.0: LSTM stopped at epoch 87 (best 67, 10.7 s); C-index LSTM 0.6729 vs forest 0.6674; IBS LSTM 0.1838 vs forest 0.1868
+            LSTM Run 2 drops: visit_1 = +0.1722, visit_2 = +0.0003, visit_3 = -0.0015
+  rho = 0.5: LSTM stopped at epoch 87 (best 67, 10.8 s); C-index LSTM 0.6750 vs forest 0.6645; IBS LSTM 0.1837 vs forest 0.1878
+            LSTM Run 2 drops: visit_1 = +0.1358, visit_2 = +0.0101, visit_3 = +0.0002
+  rho = 0.9: LSTM stopped at epoch 52 (best 32, 8.6 s); C-index LSTM 0.6776 vs forest 0.6748; IBS LSTM 0.1852 vs forest 0.1852
+            LSTM Run 2 drops: visit_1 = +0.0485, visit_2 = +0.0176, visit_3 = +0.0130

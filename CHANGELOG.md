@@ -2,7 +2,35 @@
 
 What each stage adds to the project, in plain language.
 
-## Stage 0: setup and checks on the explanation tool
+## Overview
+
+Stages in plan order. The B stages and the LSTM stages were done on the same day, alternating, so the commit order differs from this list; each stage still has its own commit.
+
+| Stage | Scenario and model | What | Date | Commit |
+|---|---|---|---|---|
+| 0 | - | Setup, pinned environment, checks on the tool | 22 Oct | 8846b4f, 0d50947 |
+| 1 | A, - | Simulator | 22 Oct | 0f71030 |
+| 2 | A, true curve | Run 1 | 22 Oct | ee959f5 |
+| 3 | A, forest | Forest and Run 2 on one dataset | 22 Oct | 391c55e |
+| 4 | A, forest | Run 3 on one dataset, background-size check | 22 Oct | 5a559be |
+| 5 | A, forest | Main runs (50 datasets) and first analysis | 22 Oct | 6ce21a6 |
+| - | - | Results on GitHub, one folder per scenario | 23 Oct | 9828885 |
+| B1 | B, - | Simulator, and "same patients as A" | 23 Oct | 5c0e9c0 |
+| B2 | B, true curve | Run 1 | 23 Oct | 132e3ab |
+| B3 | B, forest | Forest and Run 2 on one dataset | 23 Oct | 5a28bb9 |
+| B4 | B, forest | Run 3 on one dataset, mirror check | 23 Oct | d93adbd |
+| B5 | B, forest | Mirror test on 5 datasets | 23 Oct | 63cb6e3 |
+| 6a | A, LSTM | LSTM and its wrapper, tested with the tool | 23 Oct | b70132e |
+| 6b | - | LSTM settings | 23 Oct | ca8324d |
+| 6c | A and B, LSTM | Pilot on one dataset | 23 Oct | 1aacbc6 |
+| 6d | A and B, LSTM | Main runs (50 datasets per scenario) | 23 Oct | 334cd88 |
+| 7 | A and B, both models | Final analysis | 23 Oct | b631fde, 45e1b9e |
+
+## Part 1: the forest, scenario A (Stages 0 to 5)
+
+Visit 3 drives the risk. Each stage was reviewed before the next one started.
+
+### Stage 0: setup and checks on the explanation tool
 
 **Added**
 - A single settings file (`config.toml`) with every number the study uses: the correlation levels, the hazard, the dataset sizes, the forest settings, the explanation settings and one master seed. Changing a setting means editing this file only.
@@ -22,7 +50,7 @@ What each stage adds to the project, in plain language.
 **Changed from the original plan**
 - Python 3.12 instead of 3.13. A package that scikit-survival needs (`ecos`) cannot be installed on Python 3.13 without a C compiler.
 
-## Stage 1: the simulator
+### Stage 1: the simulator
 
 **Added**
 - The simulator. Each patient gets 3 visit measurements that are correlated with each other at the chosen level (0, 0.5 or 0.9). The time to the event depends only on the driver visit (visit 3 in scenario A). Patients can also be censored, at random and unrelated to their visits, so that about 30% of them have no observed event.
@@ -40,7 +68,7 @@ What each stage adds to the project, in plain language.
 - Running the same dataset twice gives identical data, and a different dataset number gives different data.
 - The Stage 0 checks now use the real simulator instead of their own test data: dataset 0 at correlation 0.9, the real time grid, and the background rows and explained patients chosen by seed (new file `src/rtds/selection.py`). The throwaway test-data file was removed. The results are unchanged: the tool still matches the exact calculation to about 1 in 10 million, and the driver still gets 99.99999% of the credit.
 
-## Stage 2: Run 1, the tool on the true survival curve
+### Stage 2: Run 1, the tool on the true survival curve
 
 **Added**
 - Scoring for each explained patient (`src/rtds/scores.py`): the visit with the most credit, the hit (1 if it is the driver; 1/2 or 1/3 if the driver is tied for most credit), and the driver's share of the total credit.
@@ -54,7 +82,7 @@ What each stage adds to the project, in plain language.
 - The results are exactly the same at all three correlation levels. This is expected: the true curve uses only the driver, and the driver values and background patients are the same at every level.
 - The tiny credit for the other visits is always the same fraction of the driver's credit (0.000000096 for visit 1 and 0.000000029 for visit 2). This shows it is the tool's fixed rounding, not a real effect.
 
-## Stage 3: the forest and Run 2
+### Stage 3: the forest and Run 2
 
 **Added**
 - The random survival forest (`src/rtds/forest.py`): 200 trees, all three visits considered at every split, at least 15 patients per leaf. Its seed depends only on the dataset number, so a dataset gets the same forest seed at every correlation level. It checks that the fixed time grid lies inside the range where the forest can predict.
@@ -70,7 +98,7 @@ What each stage adds to the project, in plain language.
 **Fixed along the way**
 - The integrated Brier score crashed when a held-out patient's time was later than every training time. Such patients only count as "still at risk" on our grid, so their time is now capped just below the last training time. This does not change the score.
 
-## Stage 4: Run 3, the tool on the forest (one dataset per correlation level)
+### Stage 4: Run 3, the tool on the forest (one dataset per correlation level)
 
 **Added**
 - One shared piece of code (`src/rtds/explain_dataset.py`) that explains a dataset's 100 chosen held-out patients and turns the credits into Table 1 rows. Run 1, Run 3 and the main runs all use it. Rerunning Run 1 with it gave a byte-identical table.
@@ -83,7 +111,7 @@ What each stage adds to the project, in plain language.
 - One explanation on the forest takes about 2 to 4 seconds.
 - Background size, compared with the largest (500 rows): with 100 rows the top visit is the same for 94% of patients, and the driver's share differs by 0.057 on average. The hit rate falls slightly as the background grows: 0.93, 0.91, 0.89 and 0.87 for 50, 100, 200 and 500 rows. Time per patient grows from 0.8 to 8.8 seconds. We keep 100 rows, as designed.
 
-## Stage 5: main runs and first analysis of Part 1
+### Stage 5: main runs and first analysis of Part 1
 
 **Added**
 - The main runs (`scripts/stage5_main_runs.py`, `src/rtds/run_dataset.py`): 50 datasets at each of the 3 correlation levels. For each dataset the forest is refitted, Run 2 and Run 3 are done, and 100 patients are explained, giving 15,000 explanations. Each dataset is saved on its own as soon as it finishes, and a restart skips finished datasets. Six datasets run in parallel. The full run took 160 minutes.
@@ -105,13 +133,19 @@ What each stage adds to the project, in plain language.
 - The forest's C-index is about 0.01 below the true-risk C-index at every level, so the model is close to the best possible.
 - Check: dataset 0 in the main runs gives the same hits, shares and C-indexes as Stage 4. 5 of its 300 credit values differ in the last binary digit (4e-16).
 
-## Before scenario B: results on GitHub, one folder per scenario
+## Between Part 1 and Part 2
+
+### Before scenario B: results on GitHub, one folder per scenario
 
 - The `results/` folder is now stored in git (about 5.5 MB), so teammates can use the tables and figures without rerunning anything.
 - Each scenario has its own folder: `results/scenario_A/` (everything from Stages 1 to 5, moved there unchanged) and `results/scenario_B/`. Rerunning the scenario A analysis from the new folder gave byte-identical tables.
 - The run scripts take `--scenario A` (the default) or `--scenario B`.
 
-## Stage B1: the simulator for scenario B
+## Scenario B with the forest (Stages B1 to B5)
+
+Visit 1 drives the risk. Each B stage repeats the Part 1 stage with the same number, for scenario B. The forest ignores visit order, so these stages check that B mirrors A. They are not new results.
+
+### Stage B1 (Stage 1 for scenario B): the simulator
 
 In scenario B, visit 1 drives the risk and visit 3 is an innocent bystander that is correlated with it. The forest sees the visits as unordered columns, so for the forest B should mirror A. Order starts to matter only for the LSTM in Part 2.
 
@@ -120,20 +154,48 @@ In scenario B, visit 1 drives the risk and visit 3 is an innocent bystander that
 - A Cox model now puts the effect on visit 1 (0.690 to 0.692; true value 0.693) and at most 0.007 in size on visits 2 and 3.
 - New check: for all 50 datasets at all 3 correlation levels, the patients' event times, censoring and driver values are identical to scenario A's (visit 1 in B equals visit 3 in A). Scenario A and B therefore use exactly the same patients and can be compared in pairs.
 
-## Stage B2: Run 1 for scenario B (the tool on the true curve)
+### Stage B2 (Stage 2 for scenario B): Run 1, the tool on the true curve
 
 **Checked** (`python scripts/run1_true_model.py --scenario B`, 1,500 explanations, about 4 minutes)
 - Visit 1 (the B driver) got the most credit for every patient at every correlation level: hit rate 1.0, with no ties and no undefined shares.
 - The driver's share is 0.999999914 for every patient. The other visits get at most 0.0000004.
 - The driver's credits are the same as in scenario A (0.155 to 5.502), because these are the same patients. The tiny leftover differs slightly from A's (0.999999875). It is the tool's fixed rounding error, which depends on which column the driver sits in.
 
-## Stage B3: the forest and Run 2 for scenario B
+### Stage B3 (Stage 3 for scenario B): the forest and Run 2
 
 **Checked** (`python scripts/stage3_forest_run2.py --scenario B`, dataset 0)
 - The forest relies on visit 1, the B driver. Shuffling it drops the C-index by 0.171, 0.166 and 0.162 at correlation 0, 0.5 and 0.9; the other visits change it by at most 0.005.
 - The held-out C-index (0.667, 0.665, 0.675) and integrated Brier score (0.187, 0.188, 0.185) are exactly the same as in scenario A. B is the same patients with the visits relabelled, and a forest that considers every visit at every split, with the same seed, builds the same trees. That is the "mirror" the design expects. The Run 2 drops differ slightly from A's because the shuffles are applied in column order, so the driver gets different random shuffles.
 
-## Stage 6a: the LSTM and its wrapper, tested with the tool
+### Stage B4 (Stage 4 for scenario B): Run 3 on one dataset, and the mirror check
+
+**Added:** `src/rtds/mirror.py` compares a scenario's results with scenario A's after relabelling the visits. In B, visit 1 is A's visit 3, visit 2 is A's visit 1 and visit 3 is A's visit 2.
+
+**Checked** (`python scripts/stage4_run3.py --scenario B`, dataset 0; output and check in `results/scenario_B/`)
+- Hit rate 0.96, 0.98 and 0.91, and driver share 0.776, 0.742 and 0.700 at correlation 0, 0.5 and 0.9: exactly scenario A's numbers.
+- Patient by patient (300 patients), B's credits equal A's relabelled credits to within 1 part in 10 million of each patient's total credit, the tool's own rounding. All hits and C-indexes are identical, and the shares agree to 0.00000015.
+- So for the forest, which ignores visit order, it makes no difference whether the driver is the first or the last visit.
+
+**Fixed before this stage ran:** the scenario change (commit 9828885) left a broken line in `scripts/stage4_run3.py`, so it could not run. It was fixed in the Stage 6a commit (b70132e), and this stage was run with the fixed script.
+
+### Stage B5 (Stage 5 for scenario B): the forest as a mirror test on 5 datasets
+
+You decided on 23 October that the forest on scenario B is a mirror test only, not 50 datasets.
+
+**Added:** `scripts/stageB5_forest_mirror.py` runs the full main-run pipeline (forest, Run 2, Run 3) for datasets 0 to 4 at every correlation level in scenario B (15 tasks, 6 in parallel, 17 minutes). It then compares every explained patient with scenario A after relabelling the visits. Output is in `results/scenario_B/` (`table1_mirror.csv`, `table2_mirror.csv`, `mirror_check.csv`, `stageB5_mirror_output.txt`).
+
+**Checked** (1,500 patients)
+- Hit rate and credit share on these 5 datasets are identical to scenario A's to 4 decimals at every level (for example 0.928 and 0.715 at correlation 0.9).
+- Every hit and every held-out C-index is identical.
+- In 14 of the 15 dataset-level runs, the credits match A's relabelled credits to within 1 part in 10 million, the tool's own rounding.
+- The exception is dataset 1 at correlation 0.9, where the credits differ by up to 0.09% of a patient's total and the shares by up to 0.0006. The forests themselves differ slightly there: their predictions differ for 7 of 500 test patients, by at most 0.0024 in survival probability. The most likely cause is an exact tie between two equally good splits, which the forest breaks by column order. That is a detail of the software, not a difference between the scenarios.
+- Conclusion: for the forest it does not matter whether the driver is the first or the last visit. The final analysis uses the forest's scenario A results, relabelled, as its scenario B results.
+
+## Part 2: the LSTM, scenarios A and B (Stage 6)
+
+The LSTM reads the visits in order, so here the two scenarios can differ.
+
+### Stage 6a: the LSTM and its wrapper, tested with the tool
 
 **Added**
 - PyTorch, CPU-only build, in `requirements.txt`. The file now points pip to PyTorch's own package index, so a clean install still works.
@@ -150,9 +212,7 @@ In scenario B, visit 1 drives the risk and visit 3 is an innocent bystander that
 - The credits add up: at every grid time, the sum of the three visits' SurvSHAP(t) values equals the patient's predicted survival minus the background average, to within 0.00000005.
 - One fit takes about 7 seconds and one explanation 0.11 seconds, about 20 times faster than on the forest.
 
-**Fixed:** `scripts/stage4_run3.py` had a broken line after the scenario change in the previous commit, so it could not run. It is fixed and was rerun for scenario B (Stage B4).
-
-## Stage 6b: the LSTM settings
+### Stage 6b: the LSTM settings
 
 You delegated the choice on 23 October. The settings are fixed after the pilot (6c) and never tuned per setting. They are in `config.toml` under `[lstm]`.
 
@@ -169,7 +229,7 @@ You delegated the choice on 23 October. The settings are fixed after the pilot (
 
 The forest's settings were also fixed in advance, so neither model is tuned.
 
-## Stage 6c: LSTM pilot on one dataset
+### Stage 6c: LSTM pilot on one dataset
 
 **Checked** (`python scripts/stage6c_lstm_pilot.py`, dataset 0, both scenarios, all correlation levels, 6 fits in parallel; output in `results/scenario_<X>/lstm/`)
 
@@ -187,29 +247,7 @@ The forest's settings were also fixed in advance, so neither model is tuned.
 - At correlation 0.9 the LSTM spreads its reliance over the three similar visits. The driver still matters most, but only by a little (0.035 against 0.023 in A; 0.049 against 0.018 in B), whereas the forest relies on the driver by about 0.16. So at 0.9, credit given to visits 1 and 2 partly reflects what this LSTM really uses, not only a mistake by the tool. Run 2 in the main runs measures this for every dataset, so the two can be told apart.
 - The settings are kept as they are; nothing was changed after the pilot.
 
-## Stage B4: Run 3 for scenario B on one dataset, and the mirror check
-
-**Added:** `src/rtds/mirror.py` compares a scenario's results with scenario A's after relabelling the visits. In B, visit 1 is A's visit 3, visit 2 is A's visit 1 and visit 3 is A's visit 2.
-
-**Checked** (`python scripts/stage4_run3.py --scenario B`, dataset 0; output and check in `results/scenario_B/`)
-- Hit rate 0.96, 0.98 and 0.91, and driver share 0.776, 0.742 and 0.700 at correlation 0, 0.5 and 0.9: exactly scenario A's numbers.
-- Patient by patient (300 patients), B's credits equal A's relabelled credits to within 1 part in 10 million of each patient's total credit, the tool's own rounding. All hits and C-indexes are identical, and the shares agree to 0.00000015.
-- So for the forest, which ignores visit order, it makes no difference whether the driver is the first or the last visit.
-
-## Stage B5: the forest on scenario B, mirror test on 5 datasets
-
-You decided on 23 October that the forest on scenario B is a mirror test only, not 50 datasets.
-
-**Added:** `scripts/stageB5_forest_mirror.py` runs the full main-run pipeline (forest, Run 2, Run 3) for datasets 0 to 4 at every correlation level in scenario B (15 tasks, 6 in parallel, 17 minutes). It then compares every explained patient with scenario A after relabelling the visits. Output is in `results/scenario_B/` (`table1_mirror.csv`, `table2_mirror.csv`, `mirror_check.csv`, `stageB5_mirror_output.txt`).
-
-**Checked** (1,500 patients)
-- Hit rate and credit share on these 5 datasets are identical to scenario A's to 4 decimals at every level (for example 0.928 and 0.715 at correlation 0.9).
-- Every hit and every held-out C-index is identical.
-- In 14 of the 15 dataset-level runs, the credits match A's relabelled credits to within 1 part in 10 million, the tool's own rounding.
-- The exception is dataset 1 at correlation 0.9, where the credits differ by up to 0.09% of a patient's total and the shares by up to 0.0006. The forests themselves differ slightly there: their predictions differ for 7 of 500 test patients, by at most 0.0024 in survival probability. The most likely cause is an exact tie between two equally good splits, which the forest breaks by column order. That is a detail of the software, not a difference between the scenarios.
-- Conclusion: for the forest it does not matter whether the driver is the first or the last visit. The final analysis uses the forest's scenario A results, relabelled, as its scenario B results.
-
-## Stage 6d: LSTM main runs, scenarios A and B
+### Stage 6d: LSTM main runs, scenarios A and B
 
 **Done** (`python scripts/stage5_main_runs.py --scenario A --model lstm`, then `--scenario B`, followed by `stage5_analysis.py` for each): 50 datasets x 3 correlation levels per scenario, the LSTM refitted for every dataset, 100 explained patients each, giving 30,000 explanations. Six datasets ran in parallel, about 5 minutes per scenario. Results are in `results/scenario_<X>/lstm/`.
 
@@ -235,7 +273,9 @@ No ties and no undefined shares among the 30,000 patients. The true-risk C-index
 
 **Fixed:** the analysis printout labelled the C-index line "forest" for every model; it now shows the model's name.
 
-## Stage 7: final analysis
+## Final analysis (Stage 7)
+
+### Stage 7: final analysis
 
 **Added:** `scripts/stage7_final_analysis.py`, one script that regenerates every summary number, test and figure from the saved tables. Output is in `results/final/`: `summary.csv`, `tests.csv`, `run1_summary.csv`, `analysis_output.txt` and `figures/`.
 - The forest's scenario B numbers are scenario A's numbers relabelled, as shown in Stages B4 and B5. The summary marks them with `source = relabelled from forest A`.

@@ -24,10 +24,10 @@ Stages in plan order. The B stages and the LSTM stages were done on the same day
 | 6b | - | LSTM settings | 23 Oct | ca8324d |
 | 6c | A and B, LSTM | Pilot on one dataset | 23 Oct | 1aacbc6 |
 | 6d | A and B, LSTM | Main runs (50 datasets per scenario) | 23 Oct | 334cd88 |
-| 6e | A, LSTM | Seed check: same data, different training seeds | 24 Oct | see below |
-| 7 | A and B, both models | Final analysis | 23 Oct, updated 24 Oct | b631fde, 45e1b9e, see below |
+| 6e | A, LSTM | Seed check: same data, different training seeds | 24 Oct | faeddea |
+| 7 | A and B, both models | Final analysis | 23 Oct, updated 24 Oct | b631fde, 45e1b9e, faeddea |
 
-**How Run 2's second measure was added (24 October).** Run 2 records the increase in integrated Brier score next to the C-index drop. The stages above report both. For datasets that were already finished, `scripts/run2_refresh.py` rebuilt every model from its seed and reran only Run 2 with the same shuffles: 465 models (forest A, forest B mirror, LSTM A and B), 37 minutes. Every rebuilt model reproduced its saved C-index drops (largest difference 1e-16), so the Brier numbers come from exactly the models behind Run 3, and Run 3 did not need to be redone.
+**How Run 2's second measure was added (24 October, commit bc8c34e).** Run 2 records the increase in integrated Brier score next to the C-index drop. The stages above report both. For datasets that were already finished, `scripts/run2_refresh.py` rebuilt every model from its seed and reran only Run 2 with the same shuffles: 465 models (forest A, forest B mirror, LSTM A and B), 37 minutes. Every rebuilt model reproduced its saved C-index drops (largest difference 1e-16), so the Brier numbers come from exactly the models behind Run 3, and Run 3 did not need to be redone.
 
 ## Part 1: the forest, scenario A (Stages 0 to 5)
 

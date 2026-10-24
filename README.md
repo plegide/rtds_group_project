@@ -29,6 +29,8 @@ pip install -r requirements.txt   # includes PyTorch's CPU-only build
 - `results/scenario_A/` and `results/scenario_B/`: every table, log and figure per scenario. Forest results sit at the top of each folder, LSTM results in its `lstm/` subfolder.
 - `results/final/`: the final analysis (Stage 7).
 
+**Run 2** records two measures per visit, from the same shuffles: the drop in C-index (does the model need the visit to rank patients?) and the increase in integrated Brier score (does it need the visit to get the survival curve right?). `scripts/run2_refresh.py` reruns only Run 2 on finished datasets, rebuilding each model from its seed and checking that it is the same model. It was used once, to add the Brier measure to the existing tables without redoing Run 3.
+
 Times below are on a laptop with 8 cores.
 
 ## Stage 0: setup checks
@@ -68,7 +70,7 @@ Output: `results/scenario_<X>/table1_run1.csv`.
 
 Scenario A:
 ```
-python scripts/stage3_forest_run2.py              # forest quality and per-visit reliance on dataset 0 at each rho (about 2 min)
+python scripts/stage3_forest_run2.py              # forest quality and Run 2 (C-index drop, Brier increase) on dataset 0 at each rho
 ```
 
 Scenario B (B3):
@@ -135,6 +137,13 @@ python scripts/stage5_analysis.py --scenario B --model lstm
 ```
 
 Output: `results/scenario_<X>/lstm/`.
+
+6e, seed check (scenario A, rho 0.9): is the LSTM's choice between look-alike visits decided by the data or by training randomness?
+```
+python scripts/stage6e_lstm_seeds.py              # 10 datasets x 5 extra training seeds, Run 2 and Run 3 as in 6d
+```
+
+Output: `results/scenario_A/lstm/seed_check/`.
 
 ## Stage 7: final analysis (forest vs LSTM, scenario A vs B)
 

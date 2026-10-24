@@ -15,11 +15,13 @@ from rtds.lstm_net import LSTMHazard, interval_index, neg_log_likelihood
 
 
 class LSTMModel:
-    def __init__(self, cfg, dataset_index, grid):
+    def __init__(self, cfg, dataset_index, grid, replicate=None):
         self.p = cfg["lstm"]
         self.grid = np.asarray(grid, dtype=float)
         self.master_seed = cfg["master_seed"]
         self.dataset_index = dataset_index
+        # None: the one LSTM of the main runs. 0, 1, ...: extra training seeds on the same data (Stage 6e).
+        self.replicate = replicate
         self.history = []  # (epoch, training loss, validation loss), for the pilot report
 
     def _sequence(self, X):
@@ -30,8 +32,9 @@ class LSTMModel:
     def fit(self, X, y):
         # One thread per model: parallelism is across datasets, and one thread keeps results reproducible.
         torch.set_num_threads(1)
-        torch.manual_seed(seeds.int_seed(self.master_seed, "lstm", self.dataset_index))
-        gen = seeds.rng(self.master_seed, "lstm", self.dataset_index)
+        stream = "lstm" if self.replicate is None else "lstm_seed_check"
+        torch.manual_seed(seeds.int_seed(self.master_seed, stream, self.dataset_index, self.replicate))
+        gen = seeds.rng(self.master_seed, stream, self.dataset_index, self.replicate)
 
         seq = self._sequence(X)
         k = torch.tensor(interval_index(y["time"], self.grid), dtype=torch.long)

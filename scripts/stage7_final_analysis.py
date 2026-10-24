@@ -7,6 +7,7 @@ Sources (all in results/):
   numbers relabelled (scenario_B/mirror_check.csv holds the evidence).
 - LSTM, scenarios A and B: scenario_<X>/lstm/*_main.csv (50 datasets per rho each)
 - Run 1: scenario_<X>/table1_run1.csv
+- Stage 6e (LSTM seed check): scenario_A/lstm/seed_check/models.csv and datasets.csv
 
 Statistics: per-dataset averages first; bootstrap intervals over datasets; paired Wilcoxon
 signed-rank tests on the shared datasets; raw and Holm-adjusted p-values over all tests.
@@ -33,7 +34,8 @@ from rtds.stats import bootstrap_ci, holm, paired_wilcoxon, per_dataset
 
 SCORES = ["hit", "credit_share"]  # the two scores that are tested
 METRICS = SCORES + ["share_visit_1", "share_visit_2", "share_visit_3", "drop_visit_1", "drop_visit_2",
-                    "drop_visit_3", "heldout_c_index", "true_risk_c_index"]
+                    "drop_visit_3", "ibs_visit_1", "ibs_visit_2", "ibs_visit_3",
+                    "heldout_c_index", "true_risk_c_index"]
 
 
 def load_per_dataset(scenario, model):
@@ -45,6 +47,9 @@ def load_per_dataset(scenario, model):
     log = pd.read_csv(base / "log_main.csv")
     drops = (t2.pivot_table(index=["rho", "dataset_seed"], columns="visit", values="c_index_drop")
              .rename(columns=lambda k: f"drop_visit_{k}").reset_index())
+    brier = (t2.pivot_table(index=["rho", "dataset_seed"], columns="visit", values="ibs_increase")
+             .rename(columns=lambda k: f"ibs_visit_{k}").reset_index())
+    drops = drops.merge(brier, on=["rho", "dataset_seed"])
     out = (per_dataset(t1).merge(drops, on=["rho", "dataset_seed"])
            .merge(ds[["rho", "dataset_seed", "heldout_c_index", "true_risk_c_index"]], on=["rho", "dataset_seed"]))
     counts = {rho: (int((t1["rho"] == rho).sum()), int(((log["rho"] == rho) & (log["n_tied"] > 1)).sum()),
@@ -56,7 +61,7 @@ def relabel_from_a(cfg, per_ds_a, scenario):
     """Scenario A's per-dataset values with the visits renamed to `scenario`'s labels."""
     out = per_ds_a.copy()
     for k, ka in visit_map(cfg, scenario).items():
-        for kind in ("share", "drop"):
+        for kind in ("share", "drop", "ibs"):
             out[f"{kind}_visit_{k}"] = per_ds_a[f"{kind}_visit_{ka}"]
     return out
 
@@ -152,6 +157,7 @@ def main():
         say(f"  hit rate {f('hit')}   credit share {f('credit_share')}")
         say(f"  share per visit: 1 = {f('share_visit_1')}, 2 = {f('share_visit_2')}, 3 = {f('share_visit_3')}")
         say(f"  Run 2 drop: 1 = {f('drop_visit_1', 4)}, 2 = {f('drop_visit_2', 4)}, 3 = {f('drop_visit_3', 4)}")
+        say(f"  Run 2 Brier increase: 1 = {f('ibs_visit_1', 4)}, 2 = {f('ibs_visit_2', 4)}, 3 = {f('ibs_visit_3', 4)}")
         say(f"  C-index model {f('heldout_c_index', 4)}, true risk {f('true_risk_c_index', 4)}")
     say(f"\nPaired Wilcoxon signed-rank tests: {len(tests)} comparisons in total "
         f"({', '.join(f'{k}: {v}' for k, v in tests['family'].value_counts(sort=False).items())}). "
@@ -160,6 +166,18 @@ def main():
     say("\nRun 1 (true survival curve):")
     say(run1.to_string(index=False, formatters={"rho": "{:g}".format, "hit": "{:.4f}".format,
                                                "credit_share": "{:.9f}".format, "lowest_share": "{:.9f}".format}))
+    # Stage 6e (LSTM seeds), read from its saved tables
+    sc = cfg["seed_stability"]
+    seed_dir = scenario_dir(sc["scenario"], "lstm") / "seed_check"
+    models = pd.read_csv(seed_dir / "models.csv")
+    ds6e = pd.read_csv(seed_dir / "datasets.csv")
+    driver = cfg["scenarios"][sc["scenario"]]
+    say(f"\nStage 6e, LSTM seeds (scenario {sc['scenario']}, rho = {sc['rho']}, {len(ds6e)} datasets x "
+        f"{int(ds6e['n_models'].iloc[0])} models): the visit Run 3 favours changes between seeds in "
+        f"{int(ds6e['run3_flips'].sum())} of {len(ds6e)} datasets; two seeds name the same top visit for "
+        f"{ds6e['patient_top_visit_agreement'].mean():.3f} of patients on average; C-index spread within a dataset "
+        f"at most {(ds6e['c_index_max'] - ds6e['c_index_min']).max():.4f}; Run 3 favours the driver in "
+        f"{int((models['run3_favoured'] == driver).sum())} of {len(models)} models.")
     (final / "analysis_output.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

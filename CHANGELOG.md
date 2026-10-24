@@ -24,7 +24,10 @@ Stages in plan order. The B stages and the LSTM stages were done on the same day
 | 6b | - | LSTM settings | 23 Oct | ca8324d |
 | 6c | A and B, LSTM | Pilot on one dataset | 23 Oct | 1aacbc6 |
 | 6d | A and B, LSTM | Main runs (50 datasets per scenario) | 23 Oct | 334cd88 |
-| 7 | A and B, both models | Final analysis | 23 Oct | b631fde, 45e1b9e |
+| 6e | A, LSTM | Seed check: same data, different training seeds | 24 Oct | see below |
+| 7 | A and B, both models | Final analysis | 23 Oct, updated 24 Oct | b631fde, 45e1b9e, see below |
+
+**How Run 2's second measure was added (24 October).** Run 2 records the increase in integrated Brier score next to the C-index drop. The stages above report both. For datasets that were already finished, `scripts/run2_refresh.py` rebuilt every model from its seed and reran only Run 2 with the same shuffles: 465 models (forest A, forest B mirror, LSTM A and B), 37 minutes. Every rebuilt model reproduced its saved C-index drops (largest difference 1e-16), so the Brier numbers come from exactly the models behind Run 3, and Run 3 did not need to be redone.
 
 ## Part 1: the forest, scenario A (Stages 0 to 5)
 
@@ -87,13 +90,14 @@ Visit 3 drives the risk. Each stage was reviewed before the next one started.
 **Added**
 - The random survival forest (`src/rtds/forest.py`): 200 trees, all three visits considered at every split, at least 15 patients per leaf. Its seed depends only on the dataset number, so a dataset gets the same forest seed at every correlation level. It checks that the fixed time grid lies inside the range where the forest can predict.
 - Model quality on the held-out patients (`src/rtds/metrics.py`): Harrell's C-index (how well the model ranks who has the event first; 0.5 is guessing, 1 is perfect) and the integrated Brier score (average squared error of the predicted survival over the time grid; lower is better).
-- Run 2 (`src/rtds/reliance.py`): shuffle one visit at a time in the held-out set, 5 times each, and measure how much the C-index drops. A big drop means the forest relies on that visit. The shuffles are the same at every correlation level.
+- Run 2 (`src/rtds/reliance.py`): shuffle one visit at a time in the held-out set, 5 times each, and measure two things from the same shuffles. The drop in C-index shows whether the forest needs the visit to rank patients. The increase in integrated Brier score shows whether it needs the visit to get the survival curve right. The second is the closer comparison with SurvSHAP(t), whose credit reacts to any change in the curve, not only to changes in ranking. A big value means the forest relies on that visit. The shuffles are the same at every correlation level.
 - The Stage 3 script, which does all of this on dataset 0 at each correlation level (about 35 seconds per level).
 
 **Checked** (dataset 0)
 - The grid (0.31 to 11.90) lies inside the forest's range (0 to 63.38) at every correlation level.
 - Held-out C-index: 0.667, 0.665 and 0.675 at correlation 0, 0.5 and 0.9. For comparison, the true risk gives 0.684 on the same patients. Integrated Brier score: 0.187, 0.188 and 0.185.
 - Run 2: shuffling the driver (visit 3) drops the C-index by 0.174, 0.168 and 0.164. Shuffling visit 1 or 2 changes it by at most 0.006. So the forest relies on the driver and hardly at all on the other visits, even when they are strongly correlated with it.
+- Run 2, Brier score: shuffling the driver makes it worse by 0.067, 0.064 and 0.054; shuffling visit 1 or 2 changes it by at most 0.003. Same picture.
 
 **Fixed along the way**
 - The integrated Brier score crashed when a held-out patient's time was later than every training time. Such patients only count as "still at risk" on our grid, so their time is now capped just below the last training time. This does not change the score.
@@ -131,6 +135,7 @@ Visit 3 drives the risk. Each stage was reviewed before the next one started.
 - At correlation 0.9 the tool does worse. Compared with correlation 0, the hit rate is 0.03 lower (p = 0.001) and the driver's share is 0.046 lower (p = 4e-9). Compared with 0.5, the share is lower (p = 8e-13) and the hit rate is lower (p = 0.018). With 6 comparisons, the strict Bonferroni threshold is 0.05 / 6 = 0.0083, and only that last hit-rate result (p = 0.018) does not pass it.
 - Run 2 shows the forest hardly uses visits 1 and 2 at any level (drops of 0.002 or less). Its reliance on visit 3 also falls a little at 0.9 (0.169 to 0.154). So part of the change at 0.9 may come from the forest itself, not only from the tool.
 - The forest's C-index is about 0.01 below the true-risk C-index at every level, so the model is close to the best possible.
+- Run 2, Brier score: shuffling the driver makes it worse by 0.069, 0.069 and 0.059. Shuffling visit 1 or 2 changes it by at most 0.0004, and every 95% interval includes 0. So the forest does not use the innocent visits to shape its curves either. The roughly 14% of credit each of them gets at correlation 0 is noise that the tool turns into positive credit. Its credit is an integral of absolute values, so a small wobble always counts as credit and never cancels out.
 - Check: dataset 0 in the main runs gives the same hits, shares and C-indexes as Stage 4. 5 of its 300 credit values differ in the last binary digit (4e-16).
 
 ## Between Part 1 and Part 2
@@ -166,6 +171,7 @@ In scenario B, visit 1 drives the risk and visit 3 is an innocent bystander that
 **Checked** (`python scripts/stage3_forest_run2.py --scenario B`, dataset 0)
 - The forest relies on visit 1, the B driver. Shuffling it drops the C-index by 0.171, 0.166 and 0.162 at correlation 0, 0.5 and 0.9; the other visits change it by at most 0.005.
 - The held-out C-index (0.667, 0.665, 0.675) and integrated Brier score (0.187, 0.188, 0.185) are exactly the same as in scenario A. B is the same patients with the visits relabelled, and a forest that considers every visit at every split, with the same seed, builds the same trees. That is the "mirror" the design expects. The Run 2 drops differ slightly from A's because the shuffles are applied in column order, so the driver gets different random shuffles.
+- Run 2, Brier score: shuffling visit 1 makes it worse by 0.068, 0.064 and 0.055; the other visits change it by at most 0.002.
 
 ### Stage B4 (Stage 4 for scenario B): Run 3 on one dataset, and the mirror check
 
@@ -245,6 +251,7 @@ The forest's settings were also fixed in advance, so neither model is tuned.
 - The LSTM predicts as well as the forest or slightly better, at every level and in both scenarios. Training stopped after 52 to 92 epochs (about 9 to 11 seconds).
 - At correlation 0 and 0.5 the LSTM clearly learned the driver: shuffling it costs 0.14 to 0.19 of C-index, and shuffling the others costs 0.01 or less.
 - At correlation 0.9 the LSTM spreads its reliance over the three similar visits. The driver still matters most, but only by a little (0.035 against 0.023 in A; 0.049 against 0.018 in B), whereas the forest relies on the driver by about 0.16. So at 0.9, credit given to visits 1 and 2 partly reflects what this LSTM really uses, not only a mistake by the tool. Run 2 in the main runs measures this for every dataset, so the two can be told apart.
+- Run 2, Brier score, tells the same story. At 0 and 0.5 shuffling the driver makes it worse by 0.038 to 0.062, and the others by at most 0.004. At 0.9 the three visits are close: 0.006, 0.004 and 0.009 in A (driver last), and 0.012, 0.006 and 0.003 in B (driver first).
 - The settings are kept as they are; nothing was changed after the pilot.
 
 ### Stage 6d: LSTM main runs, scenarios A and B
@@ -269,9 +276,25 @@ No ties and no undefined shares among the 30,000 patients. The true-risk C-index
 **What stands out**
 - Order matters for the LSTM. With the driver read first (scenario B), the tool gives visit 2 about 21% of the credit even at correlation 0, while shuffling visit 2 does not change the C-index at all. The hit rate is 0.853 in B against 0.938 in A at correlation 0.
 - In scenario B the LSTM keeps relying mostly on the driver even at 0.9 (drop 0.064 against at most 0.014 for the others), and the hit rate stays at 0.77.
+- Run 2, Brier score, settles the question about visit 2 in scenario B. At correlation 0, shuffling it changes the Brier score by 0.0001, with an interval from -0.0003 to 0.0005, while the tool gives it 21% of the credit. So the LSTM does not use visit 2 for its curve either: that credit comes from the tool and the model's noise, not from real use. At 0.9 in scenario A, the Brier increases for visits 1, 2 and 3 are 0.009, 0.006 and 0.010, confirming that this LSTM spreads its use over the three look-alike visits.
 - Within each scenario, the scores get worse as correlation rises (paired Wilcoxon p-values are in `results/scenario_<X>/lstm/analysis/paired_tests.csv`). The only exceptions are the hit rate between 0 and 0.5 in A (p = 0.13) and between 0.5 and 0.9 in B (p = 0.82).
 
 **Fixed:** the analysis printout labelled the C-index line "forest" for every model; it now shows the model's name.
+
+### Stage 6e: does the data or the training seed decide which look-alike visit the LSTM uses?
+
+Added 24 October with your approval. In 6d (scenario A, correlation 0.9) the LSTM relied on visit 1 as much as on the driver, visit 3. This stage asks whether that choice comes from the data or from training randomness.
+
+**Added:** `scripts/stage6e_lstm_seeds.py`. For datasets 0 to 9 it trains 5 extra LSTMs on the same data with the same settings; only the training seed differs. The seeds come from a new stream, `lstm_seed_check`, added at the end of the seed list, so no existing result changes. Each model goes through Run 2 and Run 3 exactly as in 6d. The 6d model of the same dataset is read back from its saved tables as a sixth model. It ran 50 trainings in parallel in 2 minutes. Settings are in `config.toml` under `[seed_stability]`; output is in `results/scenario_A/lstm/seed_check/`.
+
+**Checked** (10 datasets x 6 models)
+- In 9 of 10 datasets, the visit the tool favours flips between visit 1 and visit 3 depending only on the training seed.
+- The models are almost equally good: within a dataset the C-index differs by at most 0.017 (averages over the 10 datasets: 0.675 to 0.679 per seed).
+- On the same data, the hit rate swings with the seed. In dataset 9 it goes from 0.01 to 0.92, and in 8 of the 10 datasets its lowest value is 0.08 or less. The one dataset that does not flip (dataset 7) has the driver favoured by every seed, with hit rates from 0.38 to 0.98.
+- For a given patient, two seeds name the same top visit only 38% of the time on average, close to the 1 in 3 expected by chance.
+- The tool follows the model faithfully: in 57 of 60 models, the visit Run 3 favours is the visit whose shuffling hurts that model's Brier score most.
+
+**What this means:** when visits are this similar, two equally accurate LSTMs trained on the same patients can explain those patients in opposite ways. The explanation is faithful to each model, but which visit a model relies on is decided by chance during training, not by the data.
 
 ## Final analysis (Stage 7)
 
@@ -281,7 +304,9 @@ No ties and no undefined shares among the 30,000 patients. The true-risk C-index
 - The forest's scenario B numbers are scenario A's numbers relabelled, as shown in Stages B4 and B5. The summary marks them with `source = relabelled from forest A`.
 - Intervals come from resampling the 50 datasets, never patients.
 - Tests are paired Wilcoxon signed-rank tests on the shared datasets: 36 comparisons in total. That is 18 between correlation levels (forest A, LSTM A, LSTM B), 12 forest vs LSTM (each scenario and level), and 6 LSTM scenario A vs B (each level), each for the hit rate and the credit share. Every p-value is also given Holm-adjusted for all 36.
-- Figures: hit rate and credit share for forest vs LSTM in both scenarios, and per-visit credit (Run 3) next to per-visit reliance (Run 2) for the forest A, LSTM A and LSTM B.
+- Figures: hit rate and credit share for forest vs LSTM in both scenarios. For forest A, LSTM A and LSTM B, the per-visit credit (Run 3) is shown next to both Run 2 measures (C-index drop and Brier increase).
+- Both Run 2 measures are in `summary.csv` with bootstrap intervals. They are a reading aid and are not tested, so the number of tests stays at 36.
+- The output ends with the Stage 6e seed check, read from its saved tables.
 
 **Main results** (hit rate / driver's credit share; means over 50 datasets)
 
@@ -302,3 +327,4 @@ No ties and no undefined shares among the 30,000 patients. The true-risk C-index
   So moving from 0 to 0.5 changes little. The clear changes come at 0.9.
 - Correction: the first version of this section said 15 of 18. Recounting from `results/final/tests.csv` gives 12.
 - Run 1 (true curve) gives the driver all the credit in both scenarios (share 0.999999875 in A, 0.999999914 in B).
+- Stage 6e: in 9 of 10 datasets the visit the LSTM favours flips with the training seed (see 6e).

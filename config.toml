@@ -66,3 +66,10 @@ val_fraction = 0.2                # 200 of the 1,000 training patients, for earl
 [mirror]
 # Scenario B with the forest is only a mirror test of scenario A (decided 23 October).
 n_datasets = 5                    # datasets 0-4 at every rho, compared patient by patient with scenario A
+
+[seed_stability]
+# Stage 6e: is the LSTM's choice between look-alike visits decided by the data or by training randomness?
+scenario = "A"
+rho = 0.9                         # where the 6d LSTM relied on visit 1 as much as on the driver
+n_datasets = 10                   # datasets 0-9
+n_seeds = 5                       # extra LSTM training seeds per dataset, same data, same settings

@@ -19,18 +19,22 @@ PURPOSES = {
     "background_check": 6,  # extra background rows for the Stage 4 size check
     "bootstrap": 7,   # resampling datasets in the analysis
     "lstm": 8,        # LSTM weights, validation split and batch order
+    "lstm_seed_check": 9,  # Stage 6e: extra LSTM training seeds on the same data
 }
 
 
-def seed_sequence(master_seed, purpose, index=0):
-    return np.random.SeedSequence(entropy=master_seed, spawn_key=(PURPOSES[purpose], index))
+def seed_sequence(master_seed, purpose, index=0, replicate=None):
+    # replicate: a third key level for repeated draws on the same dataset (Stage 6e).
+    # Without it the key is exactly (purpose, index), as for every other stream.
+    key = (PURPOSES[purpose], index) if replicate is None else (PURPOSES[purpose], index, replicate)
+    return np.random.SeedSequence(entropy=master_seed, spawn_key=key)
 
 
-def rng(master_seed, purpose, index=0):
+def rng(master_seed, purpose, index=0, replicate=None):
     """A numpy Generator for one (purpose, index) stream."""
-    return np.random.default_rng(seed_sequence(master_seed, purpose, index))
+    return np.random.default_rng(seed_sequence(master_seed, purpose, index, replicate))
 
 
-def int_seed(master_seed, purpose, index=0):
+def int_seed(master_seed, purpose, index=0, replicate=None):
     """A plain int seed, for libraries such as scikit-learn that want random_state=int."""
-    return int(seed_sequence(master_seed, purpose, index).generate_state(1)[0])
+    return int(seed_sequence(master_seed, purpose, index, replicate).generate_state(1)[0])

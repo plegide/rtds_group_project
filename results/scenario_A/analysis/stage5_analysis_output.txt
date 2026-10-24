@@ -1,25 +1,28 @@
-Forest, scenario A (driver visit_3). Means over datasets with 95% bootstrap intervals (10000 resamples of datasets).
+forest, scenario A (driver visit_3). Means over datasets with 95% bootstrap intervals (10000 resamples of datasets).
 
 rho = 0: 50 datasets, 5000 patients, ties = 0, NaN shares = 0
   hit rate      0.906 [0.888, 0.923]
   credit share  0.718 [0.706, 0.729]
   share per visit: 1 = 0.143 [0.135, 0.152], 2 = 0.139 [0.131, 0.147], 3 = 0.718 [0.706, 0.729]
   Run 2 drop:      1 = 0.0006 [-0.0002, 0.0015], 2 = 0.0004 [-0.0005, 0.0013], 3 = 0.1690 [0.1642, 0.1738]
-  C-index forest 0.6689 [0.6646, 0.6730], true risk 0.6788 [0.6745, 0.6833]
+  Run 2 Brier up:  1 = 0.0002 [-0.0002, 0.0005], 2 = 0.0003 [-0.0001, 0.0006], 3 = 0.0694 [0.0671, 0.0719]
+  C-index forest 0.6689 [0.6646, 0.6731], true risk 0.6788 [0.6744, 0.6834]
 
 rho = 0.5: 50 datasets, 5000 patients, ties = 0, NaN shares = 0
-  hit rate      0.900 [0.883, 0.915]
-  credit share  0.715 [0.703, 0.726]
-  share per visit: 1 = 0.147 [0.140, 0.155], 2 = 0.139 [0.130, 0.148], 3 = 0.715 [0.702, 0.726]
-  Run 2 drop:      1 = 0.0014 [0.0002, 0.0027], 2 = 0.0003 [-0.0008, 0.0013], 3 = 0.1682 [0.1631, 0.1736]
-  C-index forest 0.6691 [0.6647, 0.6735], true risk 0.6788 [0.6745, 0.6833]
+  hit rate      0.900 [0.883, 0.916]
+  credit share  0.715 [0.702, 0.726]
+  share per visit: 1 = 0.147 [0.140, 0.155], 2 = 0.139 [0.129, 0.148], 3 = 0.715 [0.703, 0.726]
+  Run 2 drop:      1 = 0.0014 [0.0002, 0.0027], 2 = 0.0003 [-0.0008, 0.0013], 3 = 0.1682 [0.1631, 0.1737]
+  Run 2 Brier up:  1 = 0.0004 [-0.0001, 0.0009], 2 = 0.0001 [-0.0003, 0.0006], 3 = 0.0685 [0.0655, 0.0715]
+  C-index forest 0.6691 [0.6647, 0.6734], true risk 0.6788 [0.6744, 0.6832]
 
 rho = 0.9: 50 datasets, 5000 patients, ties = 0, NaN shares = 0
   hit rate      0.876 [0.848, 0.900]
   credit share  0.672 [0.653, 0.689]
-  share per visit: 1 = 0.167 [0.157, 0.177], 2 = 0.161 [0.147, 0.176], 3 = 0.672 [0.653, 0.688]
-  Run 2 drop:      1 = 0.0015 [-0.0001, 0.0032], 2 = 0.0009 [-0.0006, 0.0025], 3 = 0.1543 [0.1464, 0.1619]
-  C-index forest 0.6680 [0.6635, 0.6727], true risk 0.6788 [0.6746, 0.6834]
+  share per visit: 1 = 0.167 [0.157, 0.177], 2 = 0.161 [0.147, 0.177], 3 = 0.672 [0.653, 0.689]
+  Run 2 drop:      1 = 0.0015 [-0.0001, 0.0032], 2 = 0.0009 [-0.0006, 0.0025], 3 = 0.1543 [0.1465, 0.1618]
+  Run 2 Brier up:  1 = 0.0003 [-0.0004, 0.0010], 2 = 0.0003 [-0.0004, 0.0010], 3 = 0.0585 [0.0541, 0.0628]
+  C-index forest 0.6680 [0.6633, 0.6726], true risk 0.6788 [0.6744, 0.6833]
 
 Paired Wilcoxon signed-rank tests between rho levels, pairing on dataset: 6 comparisons (2 scores x 3 pairs of rho levels).
       metric  rho_a  rho_b  n_datasets  mean_a  mean_b  median_diff_b_minus_a  wilcoxon_stat   p_value

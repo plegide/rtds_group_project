@@ -24,7 +24,7 @@ from rtds.grid import time_grid
 from rtds.inputs import FlatVisitColumns
 from rtds.lstm_model import LSTMModel
 from rtds.metrics import c_index, ibs
-from rtds.reliance import c_index_drops
+from rtds.reliance import run2, table2_rows
 from rtds.results import TABLE2_COLUMNS, scenario_dir
 from rtds.simulate import simulate_dataset
 
@@ -40,14 +40,14 @@ def pilot(cfg, scenario, rho, grid):
     fit_s = time.perf_counter() - start
     lstm.assert_grid_inside(X_test, grid)
     forest = ForestModel(cfg, DATASET_INDEX).fit(X_train, ds.train.y)
-    drops = c_index_drops(cfg, lstm, X_test, ds.test.y, DATASET_INDEX)
+    drops = run2(cfg, lstm, X_test, ds.train.y, ds.test.y, grid, DATASET_INDEX)
     row = {"scenario": scenario, "rho": rho, "epochs_run": len(lstm.history), "best_epoch": lstm.best_epoch,
            "fit_seconds": fit_s,
            "lstm_c_index": c_index(ds.test.y, lstm.predict_risk(X_test)),
            "forest_c_index": c_index(ds.test.y, forest.predict_risk(X_test)),
            "lstm_ibs": ibs(lstm, X_test, ds.train.y, ds.test.y, grid),
            "forest_ibs": ibs(forest, X_test, ds.train.y, ds.test.y, grid)}
-    table2 = [["lstm", scenario, rho, DATASET_INDEX, int(k.removeprefix("visit_")), d] for k, d in drops.items()]
+    table2 = table2_rows("lstm", scenario, rho, DATASET_INDEX, drops)
     return row, table2
 
 
@@ -68,11 +68,12 @@ def main():
         driver = cfg["scenarios"][scenario]
         print(f"\nScenario {scenario} (driver visit_{driver}), dataset {DATASET_INDEX}")
         for r in rows:
-            d = {x[4]: x[5] for x in t2 if x[2] == r["rho"]}
+            d = {x[4]: (x[5], x[6]) for x in t2 if x[2] == r["rho"]}
             print(f"  rho = {r['rho']}: LSTM stopped at epoch {r['epochs_run']} (best {r['best_epoch']}, "
                   f"{r['fit_seconds']:.1f} s); C-index LSTM {r['lstm_c_index']:.4f} vs forest {r['forest_c_index']:.4f}; "
                   f"IBS LSTM {r['lstm_ibs']:.4f} vs forest {r['forest_ibs']:.4f}")
-            print(f"            LSTM Run 2 drops: " + ", ".join(f"visit_{k} = {v:+.4f}" for k, v in sorted(d.items())))
+            print(f"            LSTM Run 2 C-index drop: " + ", ".join(f"visit_{k} = {c:+.4f}" for k, (c, _) in sorted(d.items()))
+                  + "; Brier increase: " + ", ".join(f"visit_{k} = {b:+.4f}" for k, (_, b) in sorted(d.items())))
 
 
 if __name__ == "__main__":

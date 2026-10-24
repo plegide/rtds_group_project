@@ -41,11 +41,15 @@ def main():
     per_ds = per_dataset(table1)
     drops = (table2.pivot_table(index=["rho", "dataset_seed"], columns="visit", values="c_index_drop")
              .rename(columns=lambda k: f"drop_visit_{k}").reset_index())
+    brier = (table2.pivot_table(index=["rho", "dataset_seed"], columns="visit", values="ibs_increase")
+             .rename(columns=lambda k: f"ibs_visit_{k}").reset_index())
+    drops = drops.merge(brier, on=["rho", "dataset_seed"])
     per_ds = (per_ds.merge(drops, on=["rho", "dataset_seed"])
               .merge(datasets[["rho", "dataset_seed", "heldout_c_index", "true_risk_c_index"]], on=["rho", "dataset_seed"]))
 
     metrics = ["hit", "credit_share", "share_visit_1", "share_visit_2", "share_visit_3",
-               "drop_visit_1", "drop_visit_2", "drop_visit_3", "heldout_c_index", "true_risk_c_index"]
+               "drop_visit_1", "drop_visit_2", "drop_visit_3", "ibs_visit_1", "ibs_visit_2", "ibs_visit_3",
+               "heldout_c_index", "true_risk_c_index"]
     gen = seeds.rng(cfg["master_seed"], "bootstrap", 0)
     summary = []
     for rho in rhos:
@@ -86,6 +90,7 @@ def main():
         print(f"  credit share  {f('credit_share')}")
         print(f"  share per visit: 1 = {f('share_visit_1')}, 2 = {f('share_visit_2')}, 3 = {f('share_visit_3')}")
         print(f"  Run 2 drop:      1 = {f('drop_visit_1', 4)}, 2 = {f('drop_visit_2', 4)}, 3 = {f('drop_visit_3', 4)}")
+        print(f"  Run 2 Brier up:  1 = {f('ibs_visit_1', 4)}, 2 = {f('ibs_visit_2', 4)}, 3 = {f('ibs_visit_3', 4)}")
         print(f"  C-index {version} {f('heldout_c_index', 4)}, true risk {f('true_risk_c_index', 4)}")
 
     print(f"\nPaired Wilcoxon signed-rank tests between rho levels, pairing on dataset: "

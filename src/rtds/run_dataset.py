@@ -13,7 +13,7 @@ from rtds.explain_dataset import explain_dataset
 from rtds.inputs import FlatVisitColumns
 from rtds.metrics import c_index
 from rtds.models import make_model
-from rtds.reliance import c_index_drops
+from rtds.reliance import run2, table2_rows
 from rtds.results import DATASET_COLUMNS, LOG_COLUMNS, TABLE1_COLUMNS, TABLE2_COLUMNS
 from rtds.simulate import simulate_dataset
 
@@ -46,8 +46,8 @@ def run_dataset(cfg, dataset_index, rho, scenario, grid, out_dir, version="fores
     c = c_index(ds.test.y, model.predict_risk(X_test))
     true_c = c_index(ds.test.y, X_test[driver_col].to_numpy())  # true risk is increasing in the driver
 
-    drops = c_index_drops(cfg, model, X_test, ds.test.y, dataset_index)
-    table2 = [[version, scenario, rho, dataset_index, int(k.removeprefix("visit_")), d] for k, d in drops.items()]
+    table2 = table2_rows(version, scenario, rho, dataset_index,
+                         run2(cfg, model, X_test, ds.train.y, ds.test.y, grid, dataset_index))
     table1, log = explain_dataset(cfg, model, ds, dataset_index, builder, grid, driver_col,
                                   key=(version, scenario, rho, RUN), heldout_c_index=c)
 

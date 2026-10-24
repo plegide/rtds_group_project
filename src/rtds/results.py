@@ -18,7 +18,8 @@ TABLE1_COLUMNS = [
     "credit_visit_1", "credit_visit_2", "credit_visit_3", "top_visit", "hit",
     "credit_share", "heldout_c_index",
 ]
-TABLE2_COLUMNS = ["version", "scenario", "rho", "dataset_seed", "visit", "c_index_drop"]
+# Run 2: both measures come from the same shuffles; positive = the model got worse.
+TABLE2_COLUMNS = ["version", "scenario", "rho", "dataset_seed", "visit", "c_index_drop", "ibs_increase"]
 
 # One row per dataset: model quality and the true-risk C-index as a fixed reference.
 DATASET_COLUMNS = ["version", "scenario", "rho", "dataset_seed", "heldout_c_index", "true_risk_c_index"]

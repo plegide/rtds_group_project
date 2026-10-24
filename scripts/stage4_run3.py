@@ -24,7 +24,7 @@ from rtds.forest import ForestModel
 from rtds.grid import time_grid
 from rtds.inputs import FlatVisitColumns
 from rtds.metrics import c_index
-from rtds.reliance import c_index_drops
+from rtds.reliance import run2, table2_rows
 from rtds.results import (LOG_COLUMNS, TABLE1_COLUMNS, TABLE2_COLUMNS,
                           append_rows, scenario_dir, start_table)
 from rtds.simulate import simulate_dataset
@@ -44,8 +44,8 @@ def run_rho(cfg, rho, scenario, grid):
     model = ForestModel(cfg, DATASET_INDEX).fit(X_train, ds.train.y)
     model.assert_grid_inside(X_test, grid)
     c = c_index(ds.test.y, model.predict_risk(X_test))
-    drops = c_index_drops(cfg, model, X_test, ds.test.y, DATASET_INDEX)
-    table2 = [[VERSION, scenario, rho, DATASET_INDEX, int(k.removeprefix("visit_")), d] for k, d in drops.items()]
+    drops = run2(cfg, model, X_test, ds.train.y, ds.test.y, grid, DATASET_INDEX)
+    table2 = table2_rows(VERSION, scenario, rho, DATASET_INDEX, drops)
     start = time.perf_counter()
     rows, log = explain_dataset(cfg, model, ds, DATASET_INDEX, builder, grid, driver_col,
                                 key=(VERSION, scenario, rho, RUN), heldout_c_index=c)
@@ -73,7 +73,8 @@ def main():
         t = pd.DataFrame(rows, columns=TABLE1_COLUMNS)
         credit_cols = ["credit_visit_1", "credit_visit_2", "credit_visit_3"]
         print(f"\nrho = {rho}: C-index = {c:.4f}; Run 2 drops: "
-              + ", ".join(f"{k} = {d:+.4f}" for k, d in drops.items()))
+              + ", ".join(f"{k} = {c:+.4f}" for k, (c, _) in drops.items())
+              + "; Brier increase: " + ", ".join(f"{k} = {b:+.4f}" for k, (_, b) in drops.items()))
         print(f"  {len(t)} patients explained in {elapsed:.0f} s ({elapsed / len(t):.2f} s per patient)")
         print(f"  first {N_SHOWN} patients:")
         print(t.head(N_SHOWN)[["patient_id"] + credit_cols + ["top_visit", "hit", "credit_share"]]

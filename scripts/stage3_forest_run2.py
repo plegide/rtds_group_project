@@ -1,7 +1,8 @@
 """Stage 3: fit the forest on one dataset per rho, check its quality, and run Run 2.
 
 For each rho: the grid lies inside the forest's range, held-out C-index and integrated
-Brier score, and the drop in held-out C-index when each visit is shuffled (Run 2).
+Brier score, and Run 2: the drop in C-index and the increase in integrated Brier score
+when each visit is shuffled.
 
 Writes results/scenario_<X>/table2_stage3.csv (Table 2 rows).
 Run from the repository root:  python scripts/stage3_forest_run2.py [--scenario B]
@@ -19,7 +20,7 @@ from rtds.forest import ForestModel
 from rtds.grid import time_grid
 from rtds.inputs import FlatVisitColumns
 from rtds.metrics import c_index, ibs
-from rtds.reliance import c_index_drops
+from rtds.reliance import run2, table2_rows
 from rtds.results import TABLE2_COLUMNS, append_rows, scenario_dir, start_table
 from rtds.simulate import simulate_dataset
 
@@ -48,15 +49,16 @@ def main():
         lo, hi = model.assert_grid_inside(X_test, grid)
         c = c_index(y_test, model.predict_risk(X_test))
         brier = ibs(model, X_test, y_train, y_test, grid)
-        drops = c_index_drops(cfg, model, X_test, y_test, DATASET_INDEX)
+        drops = run2(cfg, model, X_test, y_train, y_test, grid, DATASET_INDEX)
 
-        append_rows(table_path, [[VERSION, scenario, rho, DATASET_INDEX, int(col.removeprefix("visit_")), d]
-                                 for col, d in drops.items()], TABLE2_COLUMNS)
+        append_rows(table_path, table2_rows(VERSION, scenario, rho, DATASET_INDEX, drops), TABLE2_COLUMNS)
         print(f"\nrho = {rho}  ({time.perf_counter() - start:.1f} s)")
         print(f"  forest range [{lo:.4f}, {hi:.4f}] contains the grid: yes")
         print(f"  held-out C-index = {c:.4f}, integrated Brier score = {brier:.4f}")
         print("  Run 2, drop in C-index when shuffled: "
-              + ", ".join(f"{col} = {d:+.4f}" for col, d in drops.items()))
+              + ", ".join(f"{col} = {c:+.4f}" for col, (c, _) in drops.items()))
+        print("  Run 2, increase in integrated Brier score: "
+              + ", ".join(f"{col} = {b:+.4f}" for col, (_, b) in drops.items()))
 
 
 if __name__ == "__main__":

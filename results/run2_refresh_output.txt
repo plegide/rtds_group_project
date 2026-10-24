@@ -1,0 +1,9 @@
+[Parallel(n_jobs=6)]: Using backend LokyBackend with 6 concurrent workers.
+[Parallel(n_jobs=6)]: Done   6 tasks      | elapsed:   17.9s
+[Parallel(n_jobs=6)]: Done  60 tasks      | elapsed:   51.5s
+[Parallel(n_jobs=6)]: Done 150 tasks      | elapsed:  1.8min
+[Parallel(n_jobs=6)]: Done 276 tasks      | elapsed:  3.1min
+[Parallel(n_jobs=6)]: Done 438 tasks      | elapsed: 32.1min
+[Parallel(n_jobs=6)]: Done 465 out of 465 | elapsed: 36.6min finished
+465 datasets rerun in 36.6 min; C-index drops equal to the saved ones in 465 of 465 (largest gap 1.0e-16)
+Merged Table 2 files and the Stage 3, Stage 4 and 6c tables rewritten with both Run 2 measures.

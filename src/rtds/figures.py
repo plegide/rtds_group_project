@@ -51,11 +51,12 @@ def interval_by_rho(summary, metric, ylabel, title, path, per_ds=None, chance=No
 
 
 def per_visit_panels(summary, path, driver_visit):
-    """Left: share of SurvSHAP(t) credit per visit (Run 3). Right: C-index drop per visit (Run 2)."""
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    """Per visit: share of SurvSHAP(t) credit (Run 3), then the two Run 2 measures."""
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
     width = 0.26
     panels = [("share_visit_{k}", "Share of credit (Run 3)", "Mean share of credit"),
-              ("drop_visit_{k}", "Reliance (Run 2)", "Drop in held-out C-index")]
+              ("drop_visit_{k}", "Reliance for ranking (Run 2)", "Drop in held-out C-index"),
+              ("ibs_visit_{k}", "Reliance for the curve (Run 2)", "Increase in integrated Brier score")]
     for ax, (pattern, title, ylabel) in zip(axes, panels):
         for j, k in enumerate((1, 2, 3)):
             col = pattern.format(k=k)
